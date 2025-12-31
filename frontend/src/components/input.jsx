@@ -1,46 +1,20 @@
-/*import React from "react";
-
-function Input({
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-}) {
+function Input({ type, name, placeholder, icon: Icon, value, onChange }) {
   return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-full p-3 border rounded mb-4
-                 focus:outline-none focus:ring-2 focus:ring-pink-500"
-    />
-  );
-}
-
-export default Input;*/
-function Input({ type, placeholder, icon: Icon }) {
-  return (
-    <div className="relative mb-4">
-      
-      {/* Icon */}
+    <div className="relative">
       {Icon && (
-        <Icon
-          size={20}
-          className="absolute left-3 top-3 text-gray-400"
-        />
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
       )}
-
-      {/* Input */}
       <input
         type={type}
+        name={name}
         placeholder={placeholder}
-        className={`w-full py-2 pr-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400
-          ${Icon ? "pl-10" : "pl-4"}`}
+        value={value} // ← bind value
+        onChange={onChange} // ← handle change
+        className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+        required
       />
     </div>
   );
 }
 
 export default Input;
-

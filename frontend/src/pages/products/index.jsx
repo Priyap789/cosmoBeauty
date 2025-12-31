@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import ProductGrid from "../../components/ProductGrid";
 import products from "../../data/products";
 
@@ -33,9 +32,6 @@ function ProductsPage() {
 
   return (
     <>
-      {/* Navbar */}
-     
-
       {/* Page Content */}
       <div className="min-h-screen  ">
         <h1 className="text-3xl font-bold text-pink-700 mb-6 capitalize">

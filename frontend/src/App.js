@@ -17,6 +17,7 @@ import ProductDetail from "./pages/products/productdetails";
 import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/cart";
 import Payment from "./pages/payment";
+import Faq from "./pages/faq";
 import { Toaster } from "react-hot-toast"; // ✅ ADD THIS
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment" element={<Payment />} />
+          <Route path="/faq" element={<Faq />} />
         </Route>
       </Routes>
     </CartProvider>

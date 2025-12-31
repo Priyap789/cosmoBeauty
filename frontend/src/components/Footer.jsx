@@ -24,9 +24,9 @@ function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/home" className="hover:text-pink-500">Home</Link></li>
             <li><Link to="/Products" classname="hover:text-pink-500">All Products</Link></li>
-            <li><Link to="/" classname="hover:text-pink-500">Skincare</Link></li>
-            <li><Link to="/" classname="hover:text-pink-500">Makeup</Link></li>
-            <li><Link to="/" className="hover:text-pink-500">Haircare</Link></li>
+            <li><Link to="/products/skincare" classname="hover:text-pink-500">Skincare</Link></li>
+            <li><Link to="/products/makeup" classname="hover:text-pink-500">Makeup</Link></li>
+            <li><Link to="/products/haircare/" className="hover:text-pink-500">Haircare</Link></li>
           </ul>
         </div>
 
@@ -34,11 +34,11 @@ function Footer() {
         <div>
           <h3 className="text-white font-semibold mb-3">Customer Service</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/login" className="hover:text-pink-500">My Account</Link></li>
+            <li><Link to="/" className="hover:text-pink-500">My Account</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Track Order</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Returns & Exchanges</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Shipping Info</Link></li>
-            <li><Link to="/" className="hover:text-pink-500">FAQ</Link></li>
+            <li><Link to="/faq" className="hover:text-pink-500">FAQ</Link></li>
           </ul>
         </div>
 

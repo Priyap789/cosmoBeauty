@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import Navbar from "../../components/Navbar";
 import ProductGrid from "../../components/ProductGrid";
 import products from "../../data/products";
 

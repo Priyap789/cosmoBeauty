@@ -12,7 +12,6 @@ export default function ProductDetail() {
   const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("Description");
-
   const handleAddToCart = () => {
     dispatch(addToCart({ ...product, quantity }));
     toast.success(`${quantity} ${product.name} added to cart!`);

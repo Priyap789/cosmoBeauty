@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import Hero from "../../components/Hero";
-//import ProductGrid from "../../components/ProductGrid";
 import LoginForm from "../../components/LoginForm";
 import SignupForm from "../../components/SignupForm";
 //import Cart from "../../components/Cart";
@@ -22,8 +21,7 @@ function Home() {
       <SliderSection/>
       <Hero />
       <Features/>
-      {/*<Footer/>*/}
-      {/*<ProductGrid onAddToCart={() => setShowCart(true)} />
+      
 
       {/* LOGIN / SIGNUP POPUP */}
       {popupType && (
@@ -46,10 +44,6 @@ function Home() {
         </div>
       )}
 
-      {/* CART 
-      {showCart && (
-        <Cart onCheckout={() => alert("Go to Checkout")} />
-      )}*/}
     </>
   );
 }

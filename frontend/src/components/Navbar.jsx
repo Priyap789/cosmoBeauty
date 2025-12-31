@@ -26,7 +26,7 @@ function Navbar({ onLoginClick }) {
       <ul className="hidden md:flex gap-6 font-medium items-center">
 
         <li>
-          <Link to="/home" className="hover:text-pink-600">HOME</Link>
+          <Link to="/" className="hover:text-pink-600">HOME</Link>
         </li>
 
         <li>

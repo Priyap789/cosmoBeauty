@@ -7,9 +7,12 @@ function ProductCard({ product }) {
   const dispatch = useDispatch();
 
   const handleAddToCart = (e) => {
-    e.preventDefault();      // stop Link navigation
-    e.stopPropagation();     // extra safety
-    dispatch(addToCart(product));
+    e.preventDefault(); // stop Link navigation
+    e.stopPropagation();  // extra 
+    console.log("product",product)
+    // dispatch(addToCart(product));
+    const quantity = 1;
+     dispatch(addToCart({ ...product, quantity }));
   };
 
   return (
