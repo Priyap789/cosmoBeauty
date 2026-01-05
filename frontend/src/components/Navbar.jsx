@@ -1,5 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";import {ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -28,8 +27,18 @@ function Navbar({ onLoginClick }) {
         <li>
           <Link to="/" className="hover:text-pink-600">HOME</Link>
         </li>
+         <li>
+          <Link to="/products" className="hover:text-pink-600">PRODUCTS</Link>
+        </li>
+         <li>
+          <Link to="/aboutus" className="hover:text-pink-600">ABOUT US</Link>
+        </li>
+         <li>
+          <Link to="/contactus" className="hover:text-pink-600">CONTECT US</Link>
+        </li>
+       
 
-        <li>
+       { /*<li>
           <Link to="/products" className="hover:text-pink-600">
             PRODUCTS
           </Link>
@@ -41,7 +50,7 @@ function Navbar({ onLoginClick }) {
           </Link>
         </li>
 
-        {/* MAKEUP */}
+        {/* MAKEUP 
         <li className="relative group">
           <span className="cursor-pointer hover:text-pink-600">
             MAKE UP
@@ -61,6 +70,7 @@ function Navbar({ onLoginClick }) {
                 to="/products/makeup/eyes"
                 className="block px-4 py-2 hover:bg-pink-100"
               >
+                
                 EYES
               </Link>
             </li>
@@ -81,12 +91,12 @@ function Navbar({ onLoginClick }) {
               </Link>
             </li>
           </ul>
-        </li>
+        </li>*/}
 
-        {/* HAIR & BODY */}
+        {/* HAIR & BODY 
         <li className="relative group">
           <span className="cursor-pointer hover:text-pink-600">
-            HAIR & BODY
+            About Us
           </span>
 
           <ul className="absolute left-0 top-full hidden group-hover:block bg-white shadow-lg rounded-md w-60 py-2 z-50">
@@ -107,13 +117,13 @@ function Navbar({ onLoginClick }) {
               </Link>
             </li>
           </ul>
-        </li>
+        </li>*/}
 
       </ul>
 
       {/* Icons */}
       <div className="flex items-center gap-4">
-        <Search className="cursor-pointer" />
+        {/*<Search className="cursor-pointer" />/*}
         
         {/*add to cart*/}
         <div

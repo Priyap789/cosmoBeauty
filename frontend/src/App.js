@@ -18,7 +18,10 @@ import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/cart";
 import Payment from "./pages/payment";
 import Faq from "./pages/faq";
+import AboutUs from "./pages/aboutus";
+import ContectUs from "./pages/contactus";
 import { Toaster } from "react-hot-toast"; // ✅ ADD THIS
+import ContactUs from "./pages/contactus";
 
 function App() {
   return (
@@ -45,6 +48,8 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/contactus" element={<ContactUs />} />
         </Route>
       </Routes>
     </CartProvider>

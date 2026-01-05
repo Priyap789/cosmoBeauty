@@ -41,7 +41,7 @@ function Hero() {
         <img
           src="/image/logo.png"   
           alt="Beauty Products"
-          className="rounded-xl w-80"
+          className="rounded-xl lg:w-80 w-48"
         />
       </div>
 

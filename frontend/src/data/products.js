@@ -4,8 +4,8 @@ const products = [
     id: 1,
     name: "Rose Face Cream",
     brand: "Glow Naturals",
-    mainCategory: "skincare",
-    subCategory: "face",
+    mainCategory: "Skincare",
+    subCategory: "Face Cream",
     price: 899,
     oldPrice: 1299,
     rating: 4.5,
@@ -36,31 +36,31 @@ const products = [
     image: "/image/p2.jpg",
   },
 
-  /* ================= MAKEUP : LIP ================= */
+  /* ================= MAKEUP : LIP ================= 
   {
     id: 4,
-    name: "Matte Lipstick",
+    name: "Body Lotion",
     brand: "Color Perfect",
-    mainCategory: "makeup",
-    subCategory: "lip",
+    mainCategory: "Body",
+    subCategory: "Body Lotion",
     price: 599,
     rating: 4.6,
     reviews: 890,
-    image: "/image/lipstick.jpg",
+    image: "/image/",
   },
   {
     id: 5,
-    name: "Liquid Lip Color",
+    name: "Body Scrub",
     brand: "GlamUp",
-    mainCategory: "makeup",
-    subCategory: "lip",
+    mainCategory: "Body",
+    subCategory: "Body Scrub",
     price: 699,
     rating: 4.7,
     reviews: 410,
-    image: "/image/liquidlip.jpg",
+    image: "/image/",
   },
 
-  /* ================= MAKEUP : EYES ================= */
+  /* ================= MAKEUP : EYES ================= 
   {
     id: 6,
     name: "Waterproof Eyeliner",
@@ -84,7 +84,7 @@ const products = [
     image: "/image/mascara.jpg",
   },
 
-  /* ================= MAKEUP : FACE ================= */
+  /* ================= MAKEUP : FACE ================= 
   {
     id: 8,
     name: "Liquid Foundation",
@@ -108,7 +108,7 @@ const products = [
     image: "/image/compact.jpg",
   },
 
-  /* ================= MAKEUP : TOOLS ================= */
+  /* ================= MAKEUP : TOOLS ================= 
   {
     id: 10,
     name: "Makeup Brush Set",
@@ -119,15 +119,15 @@ const products = [
     rating: 4.7,
     reviews: 180,
     image: "/image/brushset.jpg",
-  },
+  },*/
 
   /* ================= HAIR & BODY ================= */
   {
     id: 11,
     name: "Herbal Shampoo",
     brand: "HairCare Pro",
-    mainCategory: "hair-body",
-    subCategory: "shampoo-conditioner",
+    mainCategory: "Haircare",
+    subCategory: "Shampoo",
     price: 699,
     rating: 4.3,
     reviews: 210,
@@ -137,14 +137,14 @@ const products = [
     id: 12,
     name: "Smooth Conditioner",
     brand: "HairCare Pro",
-    mainCategory: "hair-body",
-    subCategory: "shampoo-conditioner",
+    mainCategory: "Haircare",
+    subCategory: "Conditioner",
     price: 649,
     rating: 4.2,
     reviews: 190,
     image: "/image/conditioner.jpg",
   },
-  {
+  /*{
     id: 13,
     name: "Refreshing Body Wash",
     brand: "BodyLux",
@@ -165,7 +165,7 @@ const products = [
     rating: 4.6,
     reviews: 310,
     image: "/image/bodycream.jpg",
-  },
+  },*/
 ];
 
 export default products;

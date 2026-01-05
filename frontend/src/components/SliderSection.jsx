@@ -18,7 +18,7 @@ function SliderSection() {
   };
 
   return (
-    <section className="relative w-full h-screen overflow-hidden">
+    <section className="relative w-full lg:h-screen h-[30vh] overflow-hidden">
       
       {sliderData.map((slide, index) => (
         <div

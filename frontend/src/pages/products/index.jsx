@@ -1,47 +1,46 @@
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import CategoryFilter from "../../components/CategoryFilter";
 import ProductGrid from "../../components/ProductGrid";
 import products from "../../data/products";
 
-
 function ProductsPage() {
-  const { category, subCategory } = useParams();
+  const [activeFilter, setActiveFilter] = useState([]);
 
-  // 🔹 Filtering logic
   const filteredProducts = products.filter((product) => {
-    // All Products
-    if (!category) return true;
+    // ✅ ALL selected
+    if (activeFilter.length === 0) return true;
 
-    // Main Category only (Skincare, Makeup, Hair & Body)
-    if (category && !subCategory) {
-      return product.mainCategory === category;
+    const selected = activeFilter[0];
+
+    // ✅ If MAIN CATEGORY selected (Skincare)
+    if (selected === product.mainCategory) {
+      return true; // shows ALL subcategories
     }
 
-    // Main + Sub Category
-    return (
-      product.mainCategory === category &&
-      product.subCategory === subCategory
-    );
+    // ✅ If SUB CATEGORY selected (Face Wash)
+    if (selected === product.subCategory) {
+      return true;
+    }
+
+    return false;
   });
 
-  // 🔹 Dynamic Page Title
-  const getTitle = () => {
-    if (!category) return "All Products";
-    if (category && !subCategory) return category.replace("-", " ");
-    return subCategory.replace("-", " ");
-  };
-
   return (
-    <>
-      {/* Page Content */}
-      <div className="min-h-screen  ">
-        <h1 className="text-3xl font-bold text-pink-700 mb-6 capitalize">
-          {getTitle()}
-        </h1>
+    <div className="min-h-screen px-6 py-6 bg-pink-50">
+      <h1 className="text-3xl font-bold text-pink-700 mb-6">
+        All Products
+      </h1>
 
-        {/* Product Grid */}
-        <ProductGrid products={filteredProducts} />
+      <div className="flex gap-6">
+        {/* FILTER */}
+        <CategoryFilter onFilterChange={setActiveFilter} />
+
+        {/* PRODUCTS */}
+        <div className="flex-1">
+          <ProductGrid products={filteredProducts} />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 

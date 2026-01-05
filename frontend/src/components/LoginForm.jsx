@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import Input from "./input";
 import Button from "./Button";
-
 function LoginForm({ onClose, switchToSignup }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("") ;
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
@@ -25,7 +24,7 @@ function LoginForm({ onClose, switchToSignup }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+      
       const data = await response.json();
 
       if (!response.ok) {
