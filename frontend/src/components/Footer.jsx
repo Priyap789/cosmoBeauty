@@ -19,24 +19,12 @@ function Footer() {
             
           </div>
         </div>
-        <div>
-          <h3 className="text-white font-semibold mb-3">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li><Link to="/home" className="hover:text-pink-500">Home</Link></li>
-            <li><Link to="/Products" classname="hover:text-pink-500">All Products</Link></li>
-            <li><Link to="/products/skincare" classname="hover:text-pink-500">Skincare</Link></li>
-            <li><Link to="/products/makeup" classname="hover:text-pink-500">Makeup</Link></li>
-            <li><Link to="/products/haircare/" className="hover:text-pink-500">Haircare</Link></li>
-          </ul>
-        </div>
-
-        
+      
         <div>
           <h3 className="text-white font-semibold mb-3">Customer Service</h3>
           <ul className="space-y-2 text-sm">
             <li><Link to="/" className="hover:text-pink-500">My Account</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Track Order</Link></li>
-            <li><Link to="/" className="hover:text-pink-500">Returns & Exchanges</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Shipping Info</Link></li>
             <li><Link to="/faq" className="hover:text-pink-500">FAQ</Link></li>
           </ul>
@@ -53,7 +41,7 @@ function Footer() {
 
           <div className="flex items-center gap-2 mt-3 text-sm">
             <Phone className="w-4 h-4 text-pink-500" />
-            <p>+91 </p>
+            <p>+91 84909 98002 </p>
           </div>
           
           <div className="flex items-center gap-2 mt-3 text-sm">

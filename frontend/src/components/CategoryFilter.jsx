@@ -1,78 +1,80 @@
 import { useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
-const categoriesData = [
+const categories = [
   {
     name: "Skincare",
-    sub: ["Face Wash", "Face Cream", "Face Serum", "Face Scrub"],
+    sub: ["Face Wash", "Face Scrub", "Face Cream", "Face Serum"],
   },
-  {
-    name: "Body",
-    sub: ["Body Lotion", "Body Scrub", "Body Cream"],
+  { name: "Body", 
+    sub: ["Body Lotion", "Body Scrub", "Body Cream", ] 
   },
-  {
-    name: "Haircare",
-    sub: ["Shampoo", "Conditioner"],
+  { name: "Glow White", 
+    sub: ["Whitening", "Brightening", "Exttra Brightening", "Lightening"] 
+  },
+  { name: "Haircare", 
+    sub: ["Shampoo", "Conditioner", "Hair Treatment Cream", "Hair Colour Shampoo", "Neon Hair Colour Spray"] 
   },
 ];
 
-export default function CategoryFilter({ onFilterChange }) {
-  const [selected, setSelected] = useState("All");
+export default function CategoryFilter({ selected, onChange }) {
+  const [openCategories, setOpenCategories] = useState(["Skincare"]);
 
-  const handleChange = (value) => {
-    setSelected(value);
+  const toggleCategory = (name) => {
+    setOpenCategories((prev) =>
+      prev.includes(name)
+        ? prev.filter((c) => c !== name)
+        : [...prev, name]
+    );
+  };
 
-    // 🔹 Pass empty array for All, else pass selected value
-    if (value === "All") {
-      onFilterChange([]);
+  const toggleSubCategory = (sub) => {
+    if (selected.includes(sub)) {
+      onChange(selected.filter((s) => s !== sub));
     } else {
-      onFilterChange([value]);
+      onChange([...selected, sub]);
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-md w-64">
-      <h3 className="font-semibold text-lg mb-4">Filters</h3>
+    <div className="w-64 bg-white border rounded-lg p-4">
+      <p className="text-sm font-medium mb-2">Category</p>
 
-      {/* ALL */}
-      <label className="flex items-center gap-2 mb-3 font-medium">
-        <input
-          type="radio"
-          name="category"
-          checked={selected === "All"}
-          onChange={() => handleChange("All")}
-        />
-        All
-      </label>
+      {categories.map((cat) => {
+        const isOpen = openCategories.includes(cat.name);
 
-      {categoriesData.map((cat) => (
-        <div key={cat.name} className="mb-4">
-          {/* CATEGORY */}
-          <label className="flex items-center gap-2 font-medium">
-            <input
-              type="radio"
-              name="category"
-              checked={selected === cat.name}
-              onChange={() => handleChange(cat.name)}
-            />
-            {cat.name}
-          </label>
+        return (
+          <div key={cat.name} className="mb-2">
+            {/* Main Category */}
+            <div
+              className="flex items-center justify-between cursor-pointer"
+              onClick={() => toggleCategory(cat.name)}
+            >
+              <span className="font-medium text-sm">{cat.name}</span>
+              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </div>
 
-          {/* SUB-CATEGORIES */}
-          <div className="ml-6 mt-2 space-y-1">
-            {cat.sub.map((sub) => (
-              <label key={sub} className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="category"
-                  checked={selected === sub}
-                  onChange={() => handleChange(sub)}
-                />
-                {sub}
-              </label>
-            ))}
+            {/* Sub Categories */}
+            {isOpen && cat.sub.length > 0 && (
+              <div className="mt-2 ml-4 space-y-2">
+                {cat.sub.map((sub) => (
+                  <label
+                    key={sub}
+                    className="flex items-center gap-2 text-sm cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(sub)}
+                      onChange={() => toggleSubCategory(sub)}
+                    />
+                    {sub}
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

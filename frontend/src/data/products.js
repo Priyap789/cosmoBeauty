@@ -16,8 +16,8 @@ const products = [
     id: 2,
     name: "Vitamin C Serum",
     brand: "Pure Radiance",
-    mainCategory: "skincare",
-    subCategory: "serum",
+    mainCategory: "Skincare",
+    subCategory: "Face Serum",
     price: 1299,
     oldPrice: 1799,
     rating: 4.8,
@@ -28,21 +28,21 @@ const products = [
     id: 3,
     name: "Aloe Vera Face Wash",
     brand: "SkinFresh",
-    mainCategory: "skincare",
-    subCategory: "face",
+    mainCategory: "Skincare",
+    subCategory: "Face Wash",
     price: 499,
     rating: 4.4,
     reviews: 321,
     image: "/image/p2.jpg",
   },
 
-  /* ================= MAKEUP : LIP ================= 
+   
   {
     id: 4,
-    name: "Body Lotion",
+    name: "Face Scrub",
     brand: "Color Perfect",
-    mainCategory: "Body",
-    subCategory: "Body Lotion",
+    mainCategory: "Skinecare",
+    subCategory: "Face Scrub",
     price: 599,
     rating: 4.6,
     reviews: 890,
@@ -50,23 +50,23 @@ const products = [
   },
   {
     id: 5,
-    name: "Body Scrub",
+    name: "Body Lotion",
     brand: "GlamUp",
     mainCategory: "Body",
-    subCategory: "Body Scrub",
+    subCategory: "Body Lotion",
     price: 699,
     rating: 4.7,
     reviews: 410,
     image: "/image/",
   },
 
-  /* ================= MAKEUP : EYES ================= 
+  
   {
     id: 6,
-    name: "Waterproof Eyeliner",
+    name: "Body Scrub",
     brand: "EyeLux",
-    mainCategory: "makeup",
-    subCategory: "eyes",
+    mainCategory: "Body",
+    subCategory: "Body Scrub",
     price: 499,
     rating: 4.5,
     reviews: 312,
@@ -74,27 +74,27 @@ const products = [
   },
   {
     id: 7,
-    name: "Mascara Volume Boost",
+    name: "Body Cream",
     brand: "LashPro",
-    mainCategory: "makeup",
-    subCategory: "eyes",
+    mainCategory: "Body",
+    subCategory: "Body Cream",
     price: 799,
     rating: 4.6,
     reviews: 287,
     image: "/image/mascara.jpg",
   },
 
-  /* ================= MAKEUP : FACE ================= 
+  
   {
     id: 8,
-    name: "Liquid Foundation",
+    name: "Conditoner",
     brand: "Perfect Skin",
-    mainCategory: "makeup",
-    subCategory: "face",
+    mainCategory: "Haircare",
+    subCategory: "Conditioner",
     price: 1199,
     rating: 4.4,
     reviews: 345,
-    image: "/image/foundation.jpg",
+    image: "/image/",
   },
   {
     id: 9,
@@ -108,7 +108,7 @@ const products = [
     image: "/image/compact.jpg",
   },
 
-  /* ================= MAKEUP : TOOLS ================= 
+  
   {
     id: 10,
     name: "Makeup Brush Set",
@@ -119,9 +119,9 @@ const products = [
     rating: 4.7,
     reviews: 180,
     image: "/image/brushset.jpg",
-  },*/
+  },
 
-  /* ================= HAIR & BODY ================= */
+  
   {
     id: 11,
     name: "Herbal Shampoo",
@@ -144,7 +144,7 @@ const products = [
     reviews: 190,
     image: "/image/conditioner.jpg",
   },
-  /*{
+  {
     id: 13,
     name: "Refreshing Body Wash",
     brand: "BodyLux",
@@ -165,7 +165,7 @@ const products = [
     rating: 4.6,
     reviews: 310,
     image: "/image/bodycream.jpg",
-  },*/
+  },
 ];
 
 export default products;

@@ -13,7 +13,7 @@ function Navbar({ onLoginClick }) {
   return (
 
 
-    <nav className="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+    <nav className="bg-white shadow-md px-6 py-4 flex items-center justify-between fixed top-0 left-0 w-full z-50">
 
       {/* Logo */}
       <h1 className="text-2xl font-bold text-pink-600 cursor-pointer"
@@ -22,7 +22,7 @@ function Navbar({ onLoginClick }) {
       </h1>
 
       {/* Menu */}
-      <ul className="hidden md:flex gap-6 font-medium items-center">
+      <ul className="hidden md:flex gap-4 font-medium items-center text-pink-800  ">
 
         <li>
           <Link to="/" className="hover:text-pink-600">HOME</Link>

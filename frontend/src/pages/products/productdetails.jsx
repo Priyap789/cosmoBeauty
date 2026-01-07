@@ -69,7 +69,7 @@ export default function ProductDetail() {
         <div className="flex gap-4 mt-4">
           <button
             onClick={handleAddToCart}
-            className="bg-pink-100 text-pink-600 px-6 py-2 rounded font-semibold hover:bg-pink-200"
+            className="bg-pink-600 text-white px-6 py-2 rounded font-semibold hover:bg-pink-700"
           >
             Add to Cart
           </button>
