@@ -118,7 +118,7 @@ const products = [
     price: 999,
     rating: 4.7,
     reviews: 180,
-    image: "/image/brushset.jpg",
+    image: "/image/makeup1.jpg",
   },
 
   

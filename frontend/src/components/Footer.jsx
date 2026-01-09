@@ -24,7 +24,8 @@ function Footer() {
           <h3 className="text-white font-semibold mb-3">Customer Service</h3>
           <ul className="space-y-2 text-sm">
             <li><Link to="/" className="hover:text-pink-500">My Account</Link></li>
-            <li><Link to="/" className="hover:text-pink-500">Track Order</Link></li>
+            <li><Link to="/privacypolicy" className="hover:text-pink-500">Privacy Policy</Link></li>
+            <li><Link to="/termsconditions" className="hover:text-pink-500">Terms & Conditions</Link></li>
             <li><Link to="/" className="hover:text-pink-500">Shipping Info</Link></li>
             <li><Link to="/faq" className="hover:text-pink-500">FAQ</Link></li>
           </ul>

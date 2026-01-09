@@ -22,6 +22,8 @@ import AboutUs from "./pages/aboutus";
 import ContectUs from "./pages/contactus";
 import { Toaster } from "react-hot-toast"; // ✅ ADD THIS
 import ContactUs from "./pages/contactus";
+import PrivacyPolicy from "./pages/privacypolicy";
+import TermsConditions from "./pages/termsconditions";
 
 function App() {
   return (
@@ -50,6 +52,8 @@ function App() {
           <Route path="/faq" element={<Faq />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contactus" element={<ContactUs />} />
+          <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+          <Route path="/termsconditions" element={<TermsConditions />} />
         </Route>
       </Routes>
     </CartProvider>

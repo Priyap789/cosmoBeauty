@@ -19,7 +19,7 @@ const OfferImageSlider = ({ images = [] }) => {
   // Auto slide every 2 seconds
   useEffect(() => {
     if (images.length <= 1) return;
-    const timer = setInterval(nextSlide,5000);
+    const timer = setInterval(nextSlide,3000);
     return () => clearInterval(timer);
   }, [currentIndex, images.length]);
 

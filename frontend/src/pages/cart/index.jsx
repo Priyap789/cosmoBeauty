@@ -82,7 +82,7 @@ function Cart() {
                       onClick={() =>
                         dispatch(removeFromCart(item.id))
                       }
-                      className="text-gray-400 hover:text-red-500 mt-3"
+                      className="text-red-500 hover:text-red-700 mt-3"
                     >
                       <Trash2 size={18} />
                     </button>

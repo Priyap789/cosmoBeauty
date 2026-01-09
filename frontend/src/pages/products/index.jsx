@@ -26,7 +26,7 @@ function ProductsPage() {
         
       </h1>
 
-      <div className="flex gap-6">
+      <div className="flex gap-0">
         <CategoryFilter
           selected={selectedFilters}
           onChange={setSelectedFilters}
