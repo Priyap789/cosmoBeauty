@@ -31,6 +31,9 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/products",require("./routes/productRoutes"));
+app.use("/api/contact",require("./routes/contactRoutes"));
+app.use("/admin", require("./routes/adminAuthRoutes"));
 
 // Start server and connect to DB
 app.listen(port, async () => {

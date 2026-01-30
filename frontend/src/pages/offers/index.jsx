@@ -1,4 +1,6 @@
 import OfferImageSlider from "../../components/OfferImageSlider";
+import SpecialOffers from "../../components/SpecialOffers";
+import DontMissOut from "../../components/DontMissOut";
 
 const OfferDetails = () => {
   const offer = {
@@ -12,13 +14,14 @@ const OfferDetails = () => {
   };
 
   return (
+    
     <div className="max-w-100% mx-auto px-4 py-6">
-        
+        <SpecialOffers/>
       {/* Multiple Horizontal Images */}
           
       <OfferImageSlider images={offer.horizontalImages} />
            
-
+        <DontMissOut/>
       
     </div>
   );

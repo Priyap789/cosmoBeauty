@@ -7,6 +7,10 @@ import SignupForm from "../../components/SignupForm";
 import Features from "../../components/Features";
 import Footer from "../../components/Footer";
 import SliderSection from "../../components/SliderSection";
+import SpecialOffers from "../../components/SpecialOffers";
+
+
+
 
 
 
@@ -17,10 +21,12 @@ function Home() {
   return (
     <>
       {/*Navbar*/}
-     
+      
       <SliderSection/>
       <Hero />
+      <SpecialOffers/>
       <Features/>
+      
       
 
       {/* LOGIN / SIGNUP POPUP */}
