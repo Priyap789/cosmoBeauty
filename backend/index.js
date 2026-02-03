@@ -20,6 +20,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 
 const app = express();
@@ -29,14 +30,26 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 app.use(express.json());
 
+// 🔹 Serve uploaded images
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/products",require("./routes/productRoutes"));
-app.use("/api/contact",require("./routes/contactRoutes"));
+app.use("/api/products", require("./routes/productRoutes"));
+app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/admin", require("./routes/adminAuthRoutes"));
+
+// 🔹 Category & Subcategory routes
+app.use("/api/categories", require("./routes/category"));
+app.use("/api/subcategories", require("./routes/subcategory"));
 
 // Start server and connect to DB
 app.listen(port, async () => {
-  await connectDB();
-  console.log(`Backend running on port ${port}`);
+  try {
+    await connectDB();
+    console.log(`Backend running on port ${port}`);
+  } catch (err) {
+    console.error("DB connection failed:", err.message);
+  }
 });
+

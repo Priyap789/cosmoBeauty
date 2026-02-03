@@ -1,20 +1,60 @@
-const Product = require("../models/Product");
+const Product = require("../models/products");
 
-exports.createProduct = async (req, res) => {
+// ADD PRODUCT
+const addProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const product = new Product({
+      name: req.body.name,
+      price: req.body.price,
+      mainCategory: req.body.mainCategory,
+      subCategory: req.body.subCategory,
+      description: req.body.description,
+      image: req.file ? `/uploads/${req.file.filename}` : "",
+    });
+
     await product.save();
-    res.status(201).json({ success: true, product });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(201).json(product);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
-exports.getProducts = async (req, res) => {
+// GET PRODUCTS
+const getProducts = async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
+};
+
+// UPDATE PRODUCT
+const updateProduct = async (req, res) => {
+  const updatedProduct = await Product.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  res.json(updatedProduct);
+};
+
+// DELETE PRODUCT
+const deleteProduct = async (req, res) => {
+  await Product.findByIdAndDelete(req.params.id);
+  res.json({ message: "Product deleted successfully" });
+};
+
+// ✅ GET TOTAL PRODUCTS
+const getProductCount = async (req, res) => {
   try {
-    const products = await Product.find({ status: true });
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const total = await Product.countDocuments();
+    res.json({ total });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+};
+
+module.exports = {
+  addProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+  getProductCount, // <-- exported the new function
 };
