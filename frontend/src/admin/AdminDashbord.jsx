@@ -10,28 +10,34 @@ import {
   Trash2,
 } from "lucide-react";
 
-const API_URL = "http://localhost:8000/api/products";
 
-/* -------- CATEGORY DATA (Beauty Shop) -------- */
+/* ================= CONFIG ================= */
+const API_URL = "http://localhost:8000/api/products";
+const IMAGE_BASE = "http://localhost:8000";
+
+/* ================= CATEGORY DATA ================= */
 const CATEGORY_MAP = {
-  Skincare: ["Facewash", "Face Scrub", "Face Cream"],
-  Makeup: ["Lipstick", "Foundation", "Eyeliner"],
-  Haircare: ["Shampoo", "Conditioner", "Hair Oil"],
-  Bodycare: ["Body Lotion", "Body Wash", "Body Scrub"],
+  Skincare: ["Face Wash", "Face Scrub", "Face Cream", "Face Serum"],
+  Body: ["Body Lotion", "Body Scrub", "Body Cream"],
+  Makeup: ["Lipstick", "Eyes", "Blusher", "Tools"],
+  Haircare: [
+    "Shampoo",
+    "Conditioner",
+    "Hair Treatment Cream",
+    "Hair Colour Shampoo",
+    "Neon Hair Colour Spray",
+  ],
 };
 
+/* ================= MAIN ================= */
 export default function AdminDashboard() {
   const [active, setActive] = useState("dashboard");
   const [totalProducts, setTotalProducts] = useState(0);
-  // Fetch total products for dashboard
+
   const fetchTotalProducts = async () => {
-    try {
-      const res = await fetch(`${API_URL}/count`);
-      const data = await res.json();
-      setTotalProducts(data.total);
-    } catch (err) {
-      console.error("Error fetching total products:", err);
-    }
+    const res = await fetch(`${API_URL}/count`);
+    const data = await res.json();
+    setTotalProducts(data.total);
   };
 
   useEffect(() => {
@@ -40,11 +46,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray text-pink-600 flex flex-col border-r">
-        <div className="p-6 text-2xl font-bold">COSMO Admin</div>
+      {/* SIDEBAR */}
+      <aside className="w-64 bg-white border-r">
+        <div className="p-6 text-2xl font-bold text-pink-600">
+          COSMO Admin
+        </div>
 
-        <nav className="flex-1">
+        <nav>
           <MenuItem
             icon={<LayoutDashboard />}
             label="Dashboard"
@@ -71,30 +79,33 @@ export default function AdminDashboard() {
           />
         </nav>
 
-        <button className="m-4 flex items-center gap-2 bg-pink-200 px-4 py-2 rounded-lg">
+        <button className="m-4 flex items-center gap-2 bg-pink-100 px-4 py-2 rounded">
           <LogOut size={18} /> Logout
         </button>
       </aside>
 
-      {/* Main Content */}
+      {/* MAIN */}
       <main className="flex-1 p-6">
-        {active === "dashboard" && <DashboardHome totalProducts={totalProducts} />}
-        {active === "products" && <Products updateTotal={fetchTotalProducts} />}
-        {active === "orders" && <Orders />}
-        {active === "users" && <UsersPage />}
+        {active === "dashboard" && (
+          <DashboardHome totalProducts={totalProducts} />
+        )}
+        {active === "products" && (
+          <Products updateTotal={fetchTotalProducts} />
+        )}
+        {active === "orders" && <h1 className="text-2xl font-bold">Orders</h1>}
+        {active === "users" && <h1 className="text-2xl font-bold">Users</h1>}
       </main>
     </div>
   );
 }
 
-/* ---------------- COMPONENTS ---------------- */
-
+/* ================= UI HELPERS ================= */
 function MenuItem({ icon, label, active, onClick }) {
   return (
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-3 px-6 py-3 ${
-        active ? "bg-pink-200" : ""
+        active ? "bg-pink-100 font-semibold" : ""
       }`}
     >
       {icon}
@@ -107,51 +118,31 @@ function DashboardHome({ totalProducts }) {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard title="Total Products" value={totalProducts} />
-        <StatCard title="Total Orders" value="—" />
-        <StatCard title="Users" value="—" />
-        <StatCard title="Revenue" value="—" />
+      <div className="bg-white p-6 rounded shadow w-64">
+        <p className="text-gray-500">Total Products</p>
+        <h2 className="text-3xl font-bold">{totalProducts}</h2>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value }) {
-  return (
-    <div className="bg-white rounded-2xl shadow p-6">
-      <p className="text-gray-500 text-sm">{title}</p>
-      <h2 className="text-2xl font-bold mt-2">{value}</h2>
-    </div>
-  );
-}
-
-/* ---------------- PRODUCTS ---------------- */
-
+/* ================= PRODUCTS ================= */
 function Products({ updateTotal }) {
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [newProduct, setNewProduct] = useState({
+
+  const [product, setProduct] = useState({
     name: "",
     price: "",
-    category: "",
+    mainCategory: "",
     subCategory: "",
-    image: "",
     description: "",
+    imageFile: null,
   });
 
-  const [filterCategory, setFilterCategory] = useState("");
+  const [filterMainCategory, setFilterMainCategory] = useState("");
   const [filterSubCategory, setFilterSubCategory] = useState("");
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [products, filterCategory, filterSubCategory]);
 
   const fetchProducts = async () => {
     const res = await fetch(API_URL);
@@ -160,256 +151,258 @@ function Products({ updateTotal }) {
     updateTotal();
   };
 
-  const applyFilters = () => {
-    let temp = [...products];
-    if (filterCategory) temp = temp.filter((p) => p.category === filterCategory);
-    if (filterSubCategory)
-      temp = temp.filter((p) => p.subCategory === filterSubCategory);
-    setFilteredProducts(temp);
-  };
-
-  const handleSave = async () => {
-    const method = editingId ? "PUT" : "POST";
-    const url = editingId ? `${API_URL}/${editingId}` : API_URL;
-
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newProduct),
-    });      
-    
-
-    setShowModal(false);
-    setEditingId(null);
-    setNewProduct({
-      name: "",
-      price: "",
-      category: "",
-      subCategory: "",
-      image: "",
-      description: "",
-    });
-
+  useEffect(() => {
     fetchProducts();
+  }, []);
+
+  const filteredProducts = products.filter((p) => {
+    if (filterMainCategory && filterSubCategory)
+      return (
+        p.mainCategory === filterMainCategory &&
+        p.subCategory === filterSubCategory
+      );
+    if (filterMainCategory) return p.mainCategory === filterMainCategory;
+    return true;
+  });
+
+  /* ================= SAVE ================= */
+  const handleSave = async () => {
+    if (
+      !product.name ||
+      !product.price ||
+      !product.mainCategory ||
+      (!editingId && !product.imageFile)
+    ) {
+      alert("Name, price, category and image are required");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("price", Number(product.price));
+      formData.append("mainCategory", product.mainCategory);
+      formData.append("subCategory", product.subCategory || "");
+      formData.append("description", product.description || "");
+
+      if (product.imageFile) {
+        formData.append("image", product.imageFile);
+      }
+
+      const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Save failed");
+
+      resetForm();
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save product");
+    }
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm("Delete this product?")) return;
     await fetch(`${API_URL}/${id}`, { method: "DELETE" });
     fetchProducts();
   };
 
-  const openEdit = (product) => {
-    setEditingId(product._id);
-    setNewProduct(product);
+  const openEdit = (p) => {
+    setEditingId(p._id);
+    setProduct({
+      name: p.name,
+      price: p.price,
+      mainCategory: p.mainCategory,
+      subCategory: p.subCategory || "",
+      description: p.description || "",
+      imageFile: null,
+    });
     setShowModal(true);
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewProduct({ ...newProduct, image: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const groupByCategory = (productsArray) => {
-    const grouped = {};
-    productsArray.forEach((p) => {
-      if (!grouped[p.category]) grouped[p.category] = [];
-      grouped[p.category].push(p);
+  const resetForm = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setProduct({
+      name: "",
+      price: "",
+      mainCategory: "",
+      subCategory: "",
+      description: "",
+      imageFile: null,
     });
-    return grouped;
   };
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between mb-4 gap-2">
+      {/* HEADER */}
+      <div className="flex justify-between mb-4">
         <h1 className="text-2xl font-bold">Products</h1>
-        <div className="flex gap-2 flex-wrap">
-          {/* Main Category Filter */}
-          <select
-            className="border p-2 rounded"
-            value={filterCategory}
-            onChange={(e) => {
-              setFilterCategory(e.target.value);
-              setFilterSubCategory("");
-            }}
-          >
-            <option value="">All Categories</option>
-            {Object.keys(CATEGORY_MAP).map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-
-          {/* Sub Category Filter */}
-          <select
-            className="border p-2 rounded"
-            value={filterSubCategory}
-            onChange={(e) => setFilterSubCategory(e.target.value)}
-            disabled={!filterCategory}
-          >
-            <option value="">All Sub Categories</option>
-            {filterCategory &&
-              CATEGORY_MAP[filterCategory].map((sub) => (
-                <option key={sub} value={sub}>
-                  {sub}
-                </option>
-              ))}
-          </select>
-
-          <button
-            className="bg-pink-600 text-white px-4 py-2 rounded-lg"
-            onClick={() => setShowModal(true)}
-          >
-            Add Product
-          </button>
-        </div>
+        <button
+          className="bg-pink-600 text-white px-4 py-2 rounded"
+          onClick={() => setShowModal(true)}
+        >
+          Add Product
+        </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow p-4">
-        {Object.entries(groupByCategory(filteredProducts)).map(
-          ([category, items]) => (
-            <div key={category} className="mb-6">
-              <h2 className="text-xl font-bold mb-2">{category}</h2>
-              <table className="w-full mb-4">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-3 text-left">Name</th>
-                    <th className="p-3">Price</th>
-                    <th className="p-3">Sub Category</th>
-                    <th className="p-3">Image</th>
-                    <th className="p-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((p) => (
-                    <tr key={p._id} className="border-t">
-                      <td className="p-3">{p.name}</td>
-                      <td className="p-3">₹{p.price}</td>
-                      <td className="p-3">{p.subCategory}</td>
-                      <td className="p-3">
-                        {p.image && (
-                          <img
-                            src={p.image}
-                            alt={p.name}
-                            className="h-12 w-12 object-cover rounded"
-                          />
-                        )}
-                      </td>
-                      <td className="p-3 flex gap-2 justify-center">
-                        <button
-                          className="text-blue-600 p-1 rounded hover:bg-blue-100"
-                          onClick={() => openEdit(p)}
-                          title="Edit"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button
-                          className="text-red-600 p-1 rounded hover:bg-red-100"
-                          onClick={() => handleDelete(p._id)}
-                          title="Delete"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )
+      {/* FILTERS */}
+      <div className="flex gap-2 mb-4">
+        <select
+          className="border p-2"
+          value={filterMainCategory}
+          onChange={(e) => {
+            setFilterMainCategory(e.target.value);
+            setFilterSubCategory("");
+          }}
+        >
+          <option value="">All Categories</option>
+          {Object.keys(CATEGORY_MAP).map((c) => (
+            <option key={c}>{c}</option>
+          ))}
+        </select>
+
+        {filterMainCategory && (
+          <select
+            className="border p-2"
+            value={filterSubCategory}
+            onChange={(e) => setFilterSubCategory(e.target.value)}
+          >
+            <option value="">All Sub Categories</option>
+            {CATEGORY_MAP[filterMainCategory].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
         )}
       </div>
 
+      {/* TABLE */}
+      <table className="w-full bg-white rounded shadow text-center">
+        <thead className="bg-gray-100">
+          <tr>
+            <th className="p-2">Name</th>
+            <th>Price</th>
+            <th>Category</th>
+            <th>Image</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredProducts.map((p) => (
+            <tr key={p._id} className="border-t">
+              <td>{p.name}</td>
+              <td>₹{p.price}</td>
+              <td>
+                {p.mainCategory}
+                <br />
+                <span className="text-xs text-gray-500">{p.subCategory}</span>
+              </td>
+              <td>
+                <img
+                  src={`${IMAGE_BASE}${p.image}`}
+                  alt={p.name}
+                  className="h-12 mx-auto rounded"
+                />
+              </td>
+              <td className="flex justify-center gap-2">
+                <Edit2
+                  className="text-blue-600 cursor-pointer"
+                  onClick={() => openEdit(p)}
+                />
+                <Trash2
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => handleDelete(p._id)}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl w-96 relative">
-            <button
-              className="absolute top-3 right-3"
-              onClick={() => setShowModal(false)}
-            >
-              <X />
-            </button>
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+          <div className="bg-white p-6 rounded w-96 relative">
+            <X
+              className="absolute top-2 right-2 cursor-pointer"
+              onClick={resetForm}
+            />
 
             <input
               className="border p-2 w-full mb-2"
               placeholder="Name"
-              value={newProduct.name}
+              value={product.name}
               onChange={(e) =>
-                setNewProduct({ ...newProduct, name: e.target.value })
+                setProduct({ ...product, name: e.target.value })
               }
             />
 
             <input
               className="border p-2 w-full mb-2"
               placeholder="Price"
-              value={newProduct.price}
+              value={product.price}
               onChange={(e) =>
-                setNewProduct({ ...newProduct, price: e.target.value })
+                setProduct({ ...product, price: e.target.value })
               }
             />
 
-            {/* MAIN CATEGORY */}
             <select
               className="border p-2 w-full mb-2"
-              value={newProduct.category}
+              value={product.mainCategory}
               onChange={(e) =>
-                setNewProduct({
-                  ...newProduct,
-                  category: e.target.value,
+                setProduct({
+                  ...product,
+                  mainCategory: e.target.value,
                   subCategory: "",
                 })
               }
             >
-              <option value="">Select Main Category</option>
-              {Object.keys(CATEGORY_MAP).map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
+              <option value="">Select Category</option>
+              {Object.keys(CATEGORY_MAP).map((c) => (
+                <option key={c}>{c}</option>
               ))}
             </select>
 
-            {/* SUB CATEGORY */}
-            <select
-              className="border p-2 w-full mb-2"
-              value={newProduct.subCategory}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, subCategory: e.target.value })
-              }
-              disabled={!newProduct.category}
-            >
-              <option value="">Select Sub Category</option>
-              {newProduct.category &&
-                CATEGORY_MAP[newProduct.category].map((sub) => (
-                  <option key={sub} value={sub}>
-                    {sub}
-                  </option>
+            {product.mainCategory && (
+              <select
+                className="border p-2 w-full mb-2"
+                value={product.subCategory}
+                onChange={(e) =>
+                  setProduct({ ...product, subCategory: e.target.value })
+                }
+              >
+                <option value="">Select Sub Category</option>
+                {CATEGORY_MAP[product.mainCategory].map((s) => (
+                  <option key={s}>{s}</option>
                 ))}
-            </select>
+              </select>
+            )}
 
-            {/* IMAGE UPLOAD */}
+            <textarea
+              className="border p-2 w-full mb-2"
+              placeholder="Description"
+              value={product.description}
+              onChange={(e) =>
+                setProduct({ ...product, description: e.target.value })
+              }
+            />
+
             <input
               type="file"
               accept="image/*"
-              className="mb-2"
-              onChange={handleImageUpload}
+              onChange={(e) =>
+                setProduct({ ...product, imageFile: e.target.files[0] })
+              }
             />
-            {newProduct.image && (
-              <img
-                src={newProduct.image}
-                alt="Preview"
-                className="h-24 w-24 object-cover rounded mb-2"
-              />
-            )}
 
             <button
-              className="bg-pink-600 text-white w-full py-2 rounded"
+              className="bg-pink-600 text-white w-full py-2 rounded mt-3"
               onClick={handleSave}
             >
               {editingId ? "Update" : "Save"}
@@ -419,14 +412,4 @@ function Products({ updateTotal }) {
       )}
     </div>
   );
-}
-
-/* ---------------- OTHERS ---------------- */
-
-function Orders() {
-  return <h1 className="text-2xl font-bold">Orders</h1>;
-}
-
-function UsersPage() {
-  return <h1 className="text-2xl font-bold">Users</h1>;
 }

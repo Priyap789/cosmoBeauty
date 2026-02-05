@@ -3,32 +3,38 @@ const multer = require("multer");
 const {
   addProduct,
   getProducts,
+  getProductById,
   updateProduct,
   deleteProduct,
-  getProductCount, // <-- import
 } = require("../controllers/productController");
 
 const router = express.Router();
 
-// Multer config...
+/* ================= MULTER CONFIG ================= */
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
+
 const upload = multer({ storage });
 
-// Routes
+/* ================= ROUTES ================= */
+
+// ADD PRODUCT
 router.post("/", upload.single("image"), addProduct);
+
+// GET ALL PRODUCTS
 router.get("/", getProducts);
-router.put("/:id", updateProduct);
+
+// 🔥 GET PRODUCT BY ID (REQUIRED FOR PRODUCT DETAIL PAGE)
+router.get("/:id", getProductById);
+
+// UPDATE PRODUCT
+router.put("/:id", upload.single("image"), updateProduct);
+
+// DELETE PRODUCT
 router.delete("/:id", deleteProduct);
 
-// ✅ New route
-router.get("/count", getProductCount);
-
 module.exports = router;
-
-
-

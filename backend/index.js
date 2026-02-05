@@ -39,17 +39,8 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/admin", require("./routes/adminAuthRoutes"));
 
-// 🔹 Category & Subcategory routes
-app.use("/api/categories", require("./routes/category"));
-app.use("/api/subcategories", require("./routes/subcategory"));
-
 // Start server and connect to DB
 app.listen(port, async () => {
-  try {
-    await connectDB();
-    console.log(`Backend running on port ${port}`);
-  } catch (err) {
-    console.error("DB connection failed:", err.message);
-  }
+  await connectDB();
+  console.log(`Backend running on port ${port}`);
 });
-
