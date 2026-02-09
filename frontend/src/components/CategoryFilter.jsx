@@ -10,7 +10,7 @@ const categories = [
     sub: ["Body Lotion", "Body Scrub", "Body Cream", ] 
   },
   { name: "Makeup", 
-    sub: ["lipstick", "eyes", "bluser", "tools"] 
+    sub: ["Lipstick", "Eyes", "Bluser", "Tools"] 
   },
   { name: "Haircare", 
     sub: ["Shampoo", "Conditioner", "Hair Treatment Cream", "Hair Colour Shampoo", "Neon Hair Colour Spray"] 

@@ -2,42 +2,77 @@ import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import Input from "./input";
 import Button from "./Button";
+
 function LoginForm({ onClose, switchToSignup }) {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("") ;
+  const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  // ---------------- HANDLE INPUT ----------------
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
+  // ---------------- HANDLE LOGIN ----------------
   const handleSubmit = async (e) => {
+
     e.preventDefault();
     setLoading(true);
     setError("");
     setMessage("");
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      
+
+      const response = await fetch(
+        "http://localhost:8000/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        }
+      );
+
       const data = await response.json();
 
+      // ❌ Error Handling
       if (!response.ok) {
-        setError(data.message || "Login failed");
-      } else {
-        setMessage("Login successful!");
-        localStorage.setItem("token", data.token);
-        setFormData({ email: "", password: "" });
-        onClose();
+        setError(data.msg || "Login failed");
+        return;
       }
+
+      // ✅ Success Handling
+      setMessage("Login successful!");
+
+      // Store token
+      localStorage.setItem("token", data.token);
+
+      // Store role
+      localStorage.setItem("role", data.role);
+
+      // Reset form
+      setFormData({ email: "", password: "" });
+
+      onClose();
+
+      // ✅ Role Based Redirect
+      if (data.role === "admin") {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/";
+      }
+
     } catch (err) {
-      console.error("Login Error:", err);
-      setError("Something went wrong. Try again.");
+      console.error(err);
+      setError("Server error. Try again.");
     } finally {
       setLoading(false);
     }
@@ -45,6 +80,7 @@ function LoginForm({ onClose, switchToSignup }) {
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg relative">
+
       <button
         onClick={onClose}
         className="absolute top-3 right-3 text-gray-500 hover:text-pink-600"
@@ -52,9 +88,12 @@ function LoginForm({ onClose, switchToSignup }) {
         ✕
       </button>
 
-      <h2 className="text-2xl font-bold text-center text-pink-700 mb-6">Login</h2>
+      <h2 className="text-2xl font-bold text-center text-pink-700 mb-6">
+        Login
+      </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+
         <Input
           type="email"
           name="email"
@@ -62,7 +101,9 @@ function LoginForm({ onClose, switchToSignup }) {
           icon={Mail}
           value={formData.email}
           onChange={handleChange}
+          required
         />
+
         <Input
           type="password"
           name="password"
@@ -70,12 +111,23 @@ function LoginForm({ onClose, switchToSignup }) {
           icon={Lock}
           value={formData.password}
           onChange={handleChange}
+          required
         />
-        <Button text={loading ? "Signing In..." : "Sign In"} type="submit" />
+
+        <Button
+          text={loading ? "Signing In..." : "Sign In"}
+          type="submit"
+        />
+
       </form>
 
-      {message && <p className="text-center text-green-500 mt-2">{message}</p>}
-      {error && <p className="text-center text-red-500 mt-2">{error}</p>}
+      {message && (
+        <p className="text-center text-green-500 mt-2">{message}</p>
+      )}
+
+      {error && (
+        <p className="text-center text-red-500 mt-2">{error}</p>
+      )}
 
       <p className="text-center mt-4 text-sm">
         Don’t have an account?
@@ -86,6 +138,7 @@ function LoginForm({ onClose, switchToSignup }) {
           Sign Up
         </button>
       </p>
+
     </div>
   );
 }

@@ -34,13 +34,17 @@ app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
-app.use("/api/auth", require("./routes/authRoutes"));
+//app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
-app.use("/admin", require("./routes/adminAuthRoutes"));
+//app.use("/admin", require("./routes/adminAuthRoutes"));
+//app.use("/admin", require("./routes/profileRoutes"));
+//app.use("/api/admin", require("./routes/adminRoutes"));
 
 // Start server and connect to DB
 app.listen(port, async () => {
   await connectDB();
   console.log(`Backend running on port ${port}`);
 });
+
+

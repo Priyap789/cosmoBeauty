@@ -9,7 +9,7 @@ function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch products from MongoDB
+  // 🔹 Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -26,12 +26,10 @@ function ProductsPage() {
     fetchProducts();
   }, []);
 
-  // ✅ Extract ONLY subcategories selected
   const selectedSubCategories = selectedFilters.filter(
     (f) => !MAIN_CATEGORIES.includes(f)
   );
 
-  // ✅ Filter products by selected subcategories
   const filteredProducts =
     selectedSubCategories.length === 0
       ? products
@@ -39,12 +37,12 @@ function ProductsPage() {
           selectedSubCategories.includes(product.subCategory)
         );
 
-  // ✅ Group products by main category
   const groupByCategory = (productsArray) => {
     const grouped = {};
     productsArray.forEach((p) => {
-      if (!grouped[p.category]) grouped[p.category] = [];
-      grouped[p.category].push(p);
+      const key = p.mainCategory || "Uncategorized";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(p);
     });
     return grouped;
   };
@@ -52,27 +50,37 @@ function ProductsPage() {
   const groupedProducts = groupByCategory(filteredProducts);
 
   return (
-    <div className="min-h-screen px-6 py-6 bg-pink-50">
-      <h1 className="text-3xl font-bold text-pink-700 mb-6">
+    <div className="min-h-screen px-4 sm:px-6 py-6 bg-purple-50">
+      <h1 className="text-3xl sm:text-4xl font-bold text-pink-700 mb-6 text-center sm:text-left">
         Our Products
       </h1>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col sm:flex-row gap-6">
         {/* 🟣 Sidebar: Category Filter */}
-        <div className="w-64">
-          <CategoryFilter selected={selectedFilters} onChange={setSelectedFilters} />
+        <div className="w-full sm:w-64 flex-shrink-0">
+          <CategoryFilter
+            selected={selectedFilters}
+            onChange={setSelectedFilters}
+          />
         </div>
 
         {/* 🟣 Products Display */}
         <div className="flex-1 space-y-8">
           {loading ? (
-            <p className="text-center mt-10 text-gray-500">Loading products...</p>
+            <p className="text-center mt-10 text-gray-500">
+              Loading products...
+            </p>
           ) : Object.keys(groupedProducts).length === 0 ? (
-            <p className="text-center mt-10 text-gray-500">No products found.</p>
+            <p className="text-center mt-10 text-gray-500">
+              No products found.
+            </p>
           ) : (
             Object.entries(groupedProducts).map(([category, items]) => (
               <div key={category}>
-                <h2 className="text-2xl font-semibold text-pink-600 mb-4">{category}</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold text-pink-600 mb-4">
+                  {category}
+                </h2>
+                {/* Make ProductGrid responsive */}
                 <ProductGrid products={items} />
               </div>
             ))

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, User } from "lucide-react";
 import { useState } from "react";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
@@ -34,7 +34,6 @@ function Navbar() {
 
       {/* Menu */}
       <ul className="hidden md:flex gap-4 font-medium items-center text-pink-800">
-
         <li>
           <NavLink to="/" end className={navClass}>
             HOME
@@ -64,12 +63,19 @@ function Navbar() {
             OFFERS
           </NavLink>
         </li>
-
       </ul>
 
       {/* Icons */}
       <div className="flex items-center gap-4">
-        
+
+        {/* User Profile Icon */}
+        <div
+          className="cursor-pointer"
+          onClick={() => navigate("/profile")}
+        >
+          <User />
+        </div>
+
         {/* Cart */}
         <div
           className="relative cursor-pointer"

@@ -3,13 +3,24 @@ const Product = require("../models/products");
 /* ================= ADD PRODUCT ================= */
 const addProduct = async (req, res) => {
   try {
+    const imagePaths = req.files
+      ? req.files.map((file) => `/uploads/${file.filename}`)
+      : [];
+
+    // Ingredients: comma-separated string to array
+    const ingredientsArray = req.body.ingredients
+      ? req.body.ingredients.split(",").map((i) => i.trim())
+      : [];
+
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
       mainCategory: req.body.mainCategory,
       subCategory: req.body.subCategory,
       description: req.body.description,
-      image: req.file ? `/uploads/${req.file.filename}` : "",
+      images: imagePaths,
+      ingredients: ingredientsArray,       // NEW
+      howToUse: req.body.howToUse || "",   // NEW
     });
 
     await product.save();
@@ -33,7 +44,7 @@ const getProducts = async (req, res) => {
   }
 };
 
-/* ================= GET PRODUCT BY ID (🔥 REQUIRED) ================= */
+/* ================= GET PRODUCT BY ID ================= */
 const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -57,11 +68,15 @@ const updateProduct = async (req, res) => {
       mainCategory: req.body.mainCategory,
       subCategory: req.body.subCategory,
       description: req.body.description,
+      ingredients: req.body.ingredients
+        ? req.body.ingredients.split(",").map((i) => i.trim())
+        : [],
+      howToUse: req.body.howToUse || "",
     };
 
-    // update image only if new file uploaded
-    if (req.file) {
-      updatedData.image = `/uploads/${req.file.filename}`;
+    // Update images if new ones uploaded
+    if (req.files && req.files.length > 0) {
+      updatedData.images = req.files.map((file) => `/uploads/${file.filename}`);
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -96,7 +111,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
   addProduct,
   getProducts,
-  getProductById, // 👈 VERY IMPORTANT
+  getProductById,
   updateProduct,
   deleteProduct,
 };

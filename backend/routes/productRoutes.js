@@ -10,7 +10,6 @@ const {
 
 const router = express.Router();
 
-/* ================= MULTER CONFIG ================= */
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
@@ -20,21 +19,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-/* ================= ROUTES ================= */
-
-// ADD PRODUCT
-router.post("/", upload.single("image"), addProduct);
-
-// GET ALL PRODUCTS
+router.post("/", upload.array("images", 5), addProduct);
 router.get("/", getProducts);
-
-// 🔥 GET PRODUCT BY ID (REQUIRED FOR PRODUCT DETAIL PAGE)
 router.get("/:id", getProductById);
-
-// UPDATE PRODUCT
-router.put("/:id", upload.single("image"), updateProduct);
-
-// DELETE PRODUCT
+router.put("/:id", upload.array("images", 5), updateProduct);
 router.delete("/:id", deleteProduct);
 
 module.exports = router;

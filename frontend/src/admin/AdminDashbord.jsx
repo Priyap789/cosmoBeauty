@@ -1,18 +1,45 @@
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  Users,
-  LogOut,
-  X,
-  Edit2,
-  Trash2,
-} from "lucide-react";
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  IconButton,
+  Avatar,
+} from "@mui/material";
 
+import {
+  Dashboard,
+  Inventory,
+  ShoppingCart,
+  People,
+  Logout,
+  Edit,
+  Delete,
+  Close,
+} from "@mui/icons-material";
 
 /* ================= CONFIG ================= */
 const API_URL = "http://localhost:8000/api/products";
+const CUSTOMER_API = "http://localhost:8000/api/admin/customers";
 const IMAGE_BASE = "http://localhost:8000";
 
 /* ================= CATEGORY DATA ================= */
@@ -29,15 +56,17 @@ const CATEGORY_MAP = {
   ],
 };
 
+const drawerWidth = 240;
+
 /* ================= MAIN ================= */
 export default function AdminDashboard() {
   const [active, setActive] = useState("dashboard");
   const [totalProducts, setTotalProducts] = useState(0);
 
   const fetchTotalProducts = async () => {
-    const res = await fetch(`${API_URL}/count`);
+    const res = await fetch(`${API_URL}`);
     const data = await res.json();
-    setTotalProducts(data.total);
+    setTotalProducts(data.length);
   };
 
   useEffect(() => {
@@ -45,91 +74,135 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r">
-        <div className="p-6 text-2xl font-bold text-pink-600">
+      <Drawer
+        variant="permanent"
+        sx={{ width: drawerWidth, "& .MuiDrawer-paper": { width: drawerWidth } }}
+      >
+        <Typography sx={{ p: 2, fontWeight: "bold", color: "deeppink" }}>
           COSMO Admin
-        </div>
+        </Typography>
 
-        <nav>
-          <MenuItem
-            icon={<LayoutDashboard />}
+        <List>
+          <SidebarItem
+            icon={<Dashboard />}
             label="Dashboard"
             active={active === "dashboard"}
             onClick={() => setActive("dashboard")}
           />
-          <MenuItem
-            icon={<Package />}
+          <SidebarItem
+            icon={<Inventory />}
             label="Products"
             active={active === "products"}
             onClick={() => setActive("products")}
           />
-          <MenuItem
-            icon={<ShoppingCart />}
-            label="Orders"
-            active={active === "orders"}
-            onClick={() => setActive("orders")}
-          />
-          <MenuItem
-            icon={<Users />}
-            label="Users"
-            active={active === "users"}
-            onClick={() => setActive("users")}
-          />
-        </nav>
+          <SidebarItem icon={<ShoppingCart />} label="Orders" />
+          <SidebarItem icon={<People />} label="Users" />
+        </List>
 
-        <button className="m-4 flex items-center gap-2 bg-pink-100 px-4 py-2 rounded">
-          <LogOut size={18} /> Logout
-        </button>
-      </aside>
+        <Button startIcon={<Logout />} sx={{ m: 2 }} variant="outlined">
+          Logout
+        </Button>
+      </Drawer>
 
       {/* MAIN */}
-      <main className="flex-1 p-6">
+      <Box sx={{ flexGrow: 1, p: 3 }}>
         {active === "dashboard" && (
-          <DashboardHome totalProducts={totalProducts} />
+          <Paper sx={{ p: 3, width: 260 }}>
+            <Typography color="text.secondary">Total Products</Typography>
+            <Typography variant="h4">{totalProducts}</Typography>
+          </Paper>
         )}
-        {active === "products" && (
-          <Products updateTotal={fetchTotalProducts} />
-        )}
-        {active === "orders" && <h1 className="text-2xl font-bold">Orders</h1>}
-        {active === "users" && <h1 className="text-2xl font-bold">Users</h1>}
-      </main>
-    </div>
+
+        {active === "products" && <Products updateTotal={fetchTotalProducts} />}
+      </Box>
+    </Box>
   );
 }
 
-/* ================= UI HELPERS ================= */
-function MenuItem({ icon, label, active, onClick }) {
+/* ================= SIDEBAR ITEM ================= */
+function SidebarItem({ icon, label, active, onClick }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-6 py-3 ${
-        active ? "bg-pink-100 font-semibold" : ""
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
+    <ListItemButton selected={active} onClick={onClick}>
+      <ListItemIcon>{icon}</ListItemIcon>
+      <ListItemText primary={label} />
+    </ListItemButton>
   );
 }
+/* ================= CUSTOMERS ================= */
+function Customers() {
 
-function DashboardHome({ totalProducts }) {
+  const [customers, setCustomers] = useState([]);
+
+  const fetchCustomers = async () => {
+    const res = await fetch(CUSTOMER_API);
+    const data = await res.json();
+    setCustomers(data);
+  };
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-      <div className="bg-white p-6 rounded shadow w-64">
-        <p className="text-gray-500">Total Products</p>
-        <h2 className="text-3xl font-bold">{totalProducts}</h2>
-      </div>
-    </div>
+    <>
+      <Typography variant="h5" mb={2}>
+        Customers
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+
+          <TableHead>
+            <TableRow>
+              <TableCell>Avatar</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Mobile</TableCell>
+              <TableCell>Gender</TableCell>
+              <TableCell>Joined</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {customers.map((c) => (
+              <TableRow key={c._id}>
+
+                <TableCell>
+                  <Avatar>
+                    {c.firstName?.charAt(0)}
+                  </Avatar>
+                </TableCell>
+
+                <TableCell>
+                  {c.firstName} {c.lastName}
+                </TableCell>
+
+                <TableCell>{c.email}</TableCell>
+                <TableCell>{c.mobile}</TableCell>
+                <TableCell>{c.gender}</TableCell>
+
+                <TableCell>
+                  {new Date(c.createdAt).toLocaleDateString()}
+                </TableCell>
+
+              </TableRow>
+            ))}
+          </TableBody>
+
+        </Table>
+      </TableContainer>
+    </>
   );
 }
 
+
+/* ================= PRODUCTS ================= */
 /* ================= PRODUCTS ================= */
 function Products({ updateTotal }) {
   const [products, setProducts] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
   const [product, setProduct] = useState({
@@ -138,7 +211,10 @@ function Products({ updateTotal }) {
     mainCategory: "",
     subCategory: "",
     description: "",
-    imageFile: null,
+    ingredients: "",
+    howToUse: "",
+    imageFiles: [],
+    mainImageIndex: 0, // ✅ Track main image
   });
 
   const [filterMainCategory, setFilterMainCategory] = useState("");
@@ -167,49 +243,26 @@ function Products({ updateTotal }) {
 
   /* ================= SAVE ================= */
   const handleSave = async () => {
-    if (
-      !product.name ||
-      !product.price ||
-      !product.mainCategory ||
-      (!editingId && !product.imageFile)
-    ) {
-      alert("Name, price, category and image are required");
-      return;
-    }
+    const formData = new FormData();
+    formData.append("name", product.name);
+    formData.append("price", product.price);
+    formData.append("mainCategory", product.mainCategory);
+    formData.append("subCategory", product.subCategory);
+    formData.append("description", product.description);
+    formData.append("ingredients", product.ingredients);
+    formData.append("howToUse", product.howToUse);
 
-    try {
-      const formData = new FormData();
-      formData.append("name", product.name);
-      formData.append("price", Number(product.price));
-      formData.append("mainCategory", product.mainCategory);
-      formData.append("subCategory", product.subCategory || "");
-      formData.append("description", product.description || "");
+    // MULTIPLE IMAGE UPLOAD
+    product.imageFiles.forEach((img, idx) => {
+      formData.append("images", img);
+      if (idx === 0) formData.append("mainImage", img.name); // optional if backend tracks main image
+    });
 
-      if (product.imageFile) {
-        formData.append("image", product.imageFile);
-      }
+    const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+    const method = editingId ? "PUT" : "POST";
 
-      const url = editingId ? `${API_URL}/${editingId}` : API_URL;
-      const method = editingId ? "PUT" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Save failed");
-
-      resetForm();
-      fetchProducts();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to save product");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) return;
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    await fetch(url, { method, body: formData });
+    resetForm();
     fetchProducts();
   };
 
@@ -219,15 +272,18 @@ function Products({ updateTotal }) {
       name: p.name,
       price: p.price,
       mainCategory: p.mainCategory,
-      subCategory: p.subCategory || "",
-      description: p.description || "",
-      imageFile: null,
+      subCategory: p.subCategory,
+      description: p.description,
+      ingredients: p.ingredients?.join(", ") || "",
+      howToUse: p.howToUse || "",
+      imageFiles: [], // new uploads
+      mainImageIndex: 0, // first image is main
     });
-    setShowModal(true);
+    setOpen(true);
   };
 
   const resetForm = () => {
-    setShowModal(false);
+    setOpen(false);
     setEditingId(null);
     setProduct({
       name: "",
@@ -235,181 +291,241 @@ function Products({ updateTotal }) {
       mainCategory: "",
       subCategory: "",
       description: "",
-      imageFile: null,
+      ingredients: "",
+      howToUse: "",
+      imageFiles: [],
+      mainImageIndex: 0,
     });
   };
 
   return (
-    <div>
+    <>
       {/* HEADER */}
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Products</h1>
-        <button
-          className="bg-pink-600 text-white px-4 py-2 rounded"
-          onClick={() => setShowModal(true)}
-        >
+      <Box display="flex" justifyContent="space-between" mb={2}>
+        <Typography variant="h5">Products</Typography>
+        <Button variant="contained" onClick={() => setOpen(true)}>
           Add Product
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {/* FILTERS */}
-      <div className="flex gap-2 mb-4">
-        <select
-          className="border p-2"
+      <Box display="flex" gap={2} mb={2}>
+        <Select
           value={filterMainCategory}
+          displayEmpty
           onChange={(e) => {
             setFilterMainCategory(e.target.value);
             setFilterSubCategory("");
           }}
         >
-          <option value="">All Categories</option>
+          <MenuItem value="">All Categories</MenuItem>
           {Object.keys(CATEGORY_MAP).map((c) => (
-            <option key={c}>{c}</option>
+            <MenuItem key={c} value={c}>
+              {c}
+            </MenuItem>
           ))}
-        </select>
+        </Select>
 
         {filterMainCategory && (
-          <select
-            className="border p-2"
+          <Select
             value={filterSubCategory}
+            displayEmpty
             onChange={(e) => setFilterSubCategory(e.target.value)}
           >
-            <option value="">All Sub Categories</option>
+            <MenuItem value="">All Sub Categories</MenuItem>
             {CATEGORY_MAP[filterMainCategory].map((s) => (
-              <option key={s}>{s}</option>
+              <MenuItem key={s} value={s}>
+                {s}
+              </MenuItem>
             ))}
-          </select>
+          </Select>
         )}
-      </div>
+      </Box>
 
       {/* TABLE */}
-      <table className="w-full bg-white rounded shadow text-center">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2">Name</th>
-            <th>Price</th>
-            <th>Category</th>
-            <th>Image</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.map((p) => (
-            <tr key={p._id} className="border-t">
-              <td>{p.name}</td>
-              <td>₹{p.price}</td>
-              <td>
-                {p.mainCategory}
-                <br />
-                <span className="text-xs text-gray-500">{p.subCategory}</span>
-              </td>
-              <td>
-                <img
-                  src={`${IMAGE_BASE}${p.image}`}
-                  alt={p.name}
-                  className="h-12 mx-auto rounded"
-                />
-              </td>
-              <td className="flex justify-center gap-2">
-                <Edit2
-                  className="text-blue-600 cursor-pointer"
-                  onClick={() => openEdit(p)}
-                />
-                <Trash2
-                  className="text-red-600 cursor-pointer"
-                  onClick={() => handleDelete(p._id)}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Price</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell align="center">Main Image</TableCell>
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {filteredProducts.map((p) => (
+              <TableRow key={p._id}>
+                <TableCell>{p.name}</TableCell>
+                <TableCell>₹{p.price}</TableCell>
+                <TableCell>
+                  {p.mainCategory}
+                  <br />
+                  <small>{p.subCategory}</small>
+                </TableCell>
+
+                {/* MAIN IMAGE PREVIEW */}
+                <TableCell align="center">
+                  <Avatar
+                    src={p.images?.length ? `${IMAGE_BASE}${p.images[0]}` : ""}
+                    variant="rounded"
+                    sx={{ width: 40, height: 40, mx: "auto" }}
+                  />
+                  <Typography variant="caption" display="block">
+                    Main Image
+                  </Typography>
+                </TableCell>
+
+                <TableCell align="center">
+                  <IconButton onClick={() => openEdit(p)}>
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() =>
+                      fetch(`${API_URL}/${p._id}`, {
+                        method: "DELETE",
+                      }).then(fetchProducts)
+                    }
+                  >
+                    <Delete />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-96 relative">
-            <X
-              className="absolute top-2 right-2 cursor-pointer"
-              onClick={resetForm}
-            />
+      <Dialog open={open} onClose={resetForm} fullWidth>
+        <DialogTitle>
+          {editingId ? "Edit Product" : "Add Product"}
+          <IconButton
+            onClick={resetForm}
+            sx={{ position: "absolute", right: 8, top: 8 }}
+          >
+            <Close />
+          </IconButton>
+        </DialogTitle>
 
-            <input
-              className="border p-2 w-full mb-2"
-              placeholder="Name"
-              value={product.name}
-              onChange={(e) =>
-                setProduct({ ...product, name: e.target.value })
-              }
-            />
+        <DialogContent>
+          <TextField
+            label="Name"
+            fullWidth
+            margin="dense"
+            value={product.name}
+            onChange={(e) =>
+              setProduct({ ...product, name: e.target.value })
+            }
+          />
+          <TextField
+            label="Price"
+            fullWidth
+            margin="dense"
+            value={product.price}
+            onChange={(e) =>
+              setProduct({ ...product, price: e.target.value })
+            }
+          />
 
-            <input
-              className="border p-2 w-full mb-2"
-              placeholder="Price"
-              value={product.price}
-              onChange={(e) =>
-                setProduct({ ...product, price: e.target.value })
-              }
-            />
+          <Select
+            fullWidth
+            displayEmpty
+            value={product.mainCategory}
+            onChange={(e) =>
+              setProduct({ ...product, mainCategory: e.target.value, subCategory: "" })
+            }
+            sx={{ mt: 2 }}
+          >
+            <MenuItem value="">Select Category</MenuItem>
+            {Object.keys(CATEGORY_MAP).map((c) => (
+              <MenuItem key={c} value={c}>{c}</MenuItem>
+            ))}
+          </Select>
 
-            <select
-              className="border p-2 w-full mb-2"
-              value={product.mainCategory}
+          {product.mainCategory && (
+            <Select
+              fullWidth
+              displayEmpty
+              value={product.subCategory}
               onChange={(e) =>
-                setProduct({
-                  ...product,
-                  mainCategory: e.target.value,
-                  subCategory: "",
-                })
+                setProduct({ ...product, subCategory: e.target.value })
               }
+              sx={{ mt: 2 }}
             >
-              <option value="">Select Category</option>
-              {Object.keys(CATEGORY_MAP).map((c) => (
-                <option key={c}>{c}</option>
+              <MenuItem value="">Select Sub Category</MenuItem>
+              {CATEGORY_MAP[product.mainCategory].map((s) => (
+                <MenuItem key={s} value={s}>{s}</MenuItem>
               ))}
-            </select>
+            </Select>
+          )}
 
-            {product.mainCategory && (
-              <select
-                className="border p-2 w-full mb-2"
-                value={product.subCategory}
-                onChange={(e) =>
-                  setProduct({ ...product, subCategory: e.target.value })
-                }
-              >
-                <option value="">Select Sub Category</option>
-                {CATEGORY_MAP[product.mainCategory].map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-            )}
+          <TextField
+            label="Description"
+            fullWidth
+            multiline
+            margin="dense"
+            value={product.description}
+            onChange={(e) =>
+              setProduct({ ...product, description: e.target.value })
+            }
+          />
 
-            <textarea
-              className="border p-2 w-full mb-2"
-              placeholder="Description"
-              value={product.description}
-              onChange={(e) =>
-                setProduct({ ...product, description: e.target.value })
-              }
-            />
+          {/* Ingredients */}
+          <TextField
+            label="Ingredients (comma separated)"
+            fullWidth
+            multiline
+            margin="dense"
+            value={product.ingredients}
+            onChange={(e) =>
+              setProduct({ ...product, ingredients: e.target.value })
+            }
+          />
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setProduct({ ...product, imageFile: e.target.files[0] })
-              }
-            />
+          {/* How to Use */}
+          <TextField
+            label="How to Use"
+            fullWidth
+            multiline
+            margin="dense"
+            value={product.howToUse}
+            onChange={(e) =>
+              setProduct({ ...product, howToUse: e.target.value })
+            }
+          />
 
-            <button
-              className="bg-pink-600 text-white w-full py-2 rounded mt-3"
-              onClick={handleSave}
-            >
-              {editingId ? "Update" : "Save"}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+          {/* MULTIPLE IMAGE INPUT */}
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={(e) =>
+              setProduct({
+                ...product,
+                imageFiles: Array.from(e.target.files),
+                mainImageIndex: 0, // first uploaded is main
+              })
+            }
+            style={{ marginTop: "10px" }}
+          />
+          {product.imageFiles.length > 0 && (
+            <Typography variant="caption" display="block">
+              First image will be main
+            </Typography>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={resetForm}>Cancel</Button>
+          <Button variant="contained" onClick={handleSave}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

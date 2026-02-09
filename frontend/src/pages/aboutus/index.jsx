@@ -2,7 +2,7 @@ const AboutUs = () => {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <div className="bg-pink-50 py-20 text-center">
+      <div className="bg-purple-50 py-20 text-center">
         <h1 className="text-4xl font-bold text-pink-600">About COSMO</h1>
         <p className="mt-4 text-gray-600 max-w-2xl mx-auto">
           Redefining beauty with 100% authentic and premium beauty products

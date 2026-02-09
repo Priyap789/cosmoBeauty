@@ -7,7 +7,9 @@ const productSchema = new mongoose.Schema(
     mainCategory: String,
     subCategory: String,
     description: String,
-    image: String,
+    images: [String], // multiple images
+    ingredients: [String], // NEW: list of ingredients
+    howToUse: String,      // NEW: instructions
   },
   { timestamps: true }
 );

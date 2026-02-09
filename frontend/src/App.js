@@ -16,6 +16,7 @@ import Layout from "./components/Layout";
 import ProductDetail from "./pages/products/productdetails";
 import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/cart";
+import ProfilePage from "./pages/profilepage";
 import Payment from "./pages/payment";
 import Faq from "./pages/faq";
 import AboutUs from "./pages/aboutus";
@@ -51,6 +52,7 @@ function App() {
           <Route path="/products/hair-body/shampoo-conditioner" element={<Shampoo />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/payment" element={<Payment />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/aboutus" element={<AboutUs />} />
