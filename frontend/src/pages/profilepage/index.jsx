@@ -1,92 +1,146 @@
-import { useState } from "react";
-import ProfileInfo from "./ProfileInfo";
-import ManageAddress from "./ManageAddress";
-import MyOrders from "./MyOrders";
-import MyReviews from "./MyReviews";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState("orders");
+const API_URL = "http://localhost:8000/api/profile";
+
+export default function Profile() {
+  const token = localStorage.getItem("token"); // use JWT instead of userId
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    addresses: [
+      {
+        fullName: "",
+        mobile: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+      },
+    ],
+  });
+
+  // Fetch profile
+  useEffect(() => {
+    if (!token) return; // no token, skip fetch
+
+    axios.get(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => setFormData(res.data))
+      .catch((err) => console.log(err));
+  }, [token]);
+
+  // Handle change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Address change
+  const handleAddressChange = (e) => {
+    const updatedAddress = { ...formData.addresses[0] };
+    updatedAddress[e.target.name] = e.target.value;
+
+    setFormData({
+      ...formData,
+      addresses: [updatedAddress],
+    });
+  };
+
+  // Save
+  const handleSave = async () => {
+    if (!token) return alert("User not authenticated");
+
+    try {
+      const res = await axios.put(`${API_URL}/me`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Profile Updated");
+      setFormData(res.data);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update profile");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#f5f3ff] flex justify-center py-10">
-      <div className="w-[1100px] bg-white rounded-lg shadow flex">
-        
-        {/* Sidebar */}
-        <div className="w-1/4 border-r">
-          <div className="p-5 border-b">
-            <p className="text-sm text-gray-500">Hello,</p>
-            <p className="font-semibold">Priya Prajapati</p>
-          </div>
+    <div className="max-w-3xl mx-auto p-5">
+      <h2 className="text-2xl font-bold mb-4">My Profile</h2>
 
-          <ul className="p-3 text-sm">
+      <input
+        type="text"
+        name="name"
+        placeholder="Name"
+        value={formData.name}
+        onChange={handleChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            {/* My Orders */}
-            <li
-              onClick={() => setActiveTab("orders")}
-              className={`cursor-pointer px-3 py-2 rounded font-semibold ${
-                activeTab === "orders"
-                  ? "bg-blue-50 text-blue-600"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              My Orders
-            </li>
+      <input
+        type="email"
+        name="email"
+        value={formData.email}
+        disabled
+        className="border p-2 w-full mb-3 bg-gray-100"
+      />
 
-            <li className="mt-4 text-gray-500">ACCOUNT SETTINGS</li>
+      <input
+        type="text"
+        name="mobile"
+        placeholder="Mobile Number"
+        value={formData.mobile}
+        onChange={handleChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            <li
-              onClick={() => setActiveTab("profile")}
-              className={`cursor-pointer px-3 py-2 rounded mt-1 ${
-                activeTab === "profile"
-                  ? "bg-blue-50 text-blue-600 font-medium"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Profile Information
-            </li>
+      <h3 className="font-semibold mt-4">Address</h3>
 
-            <li
-              onClick={() => setActiveTab("address")}
-              className={`cursor-pointer px-3 py-2 rounded ${
-                activeTab === "address"
-                  ? "bg-blue-50 text-blue-600 font-medium"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              Manage Addresses
-            </li>
+      <input
+        type="text"
+        name="address"
+        placeholder="Address"
+        value={formData.addresses[0]?.address || ""}
+        onChange={handleAddressChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            <li className="mt-6 text-gray-500">PAYMENTS</li>
-            <li className="px-3 py-2">Saved Cards</li>
+      <input
+        type="text"
+        name="city"
+        placeholder="City"
+        value={formData.addresses[0]?.city || ""}
+        onChange={handleAddressChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            <li className="mt-6 text-gray-500">MY STUFF</li>
+      <input
+        type="text"
+        name="state"
+        placeholder="State"
+        value={formData.addresses[0]?.state || ""}
+        onChange={handleAddressChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            {/* Reviews */}
-            <li
-              onClick={() => setActiveTab("reviews")}
-              className={`cursor-pointer px-3 py-2 rounded ${
-                activeTab === "reviews"
-                  ? "bg-blue-50 text-blue-600 font-medium"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-              My Reviews & Ratings
-            </li>
+      <input
+        type="text"
+        name="pincode"
+        placeholder="Pincode"
+        value={formData.addresses[0]?.pincode || ""}
+        onChange={handleAddressChange}
+        className="border p-2 w-full mb-3"
+      />
 
-            <li className="mt-6 text-red-500 px-3 py-2 cursor-pointer">
-              Logout
-            </li>
-          </ul>
-        </div>
-
-        {/* Right Content */}
-        <div className="w-3/4 p-8 bg-gray-50">
-          {activeTab === "orders" && <MyOrders />}
-          {activeTab === "profile" && <ProfileInfo />}
-          {activeTab === "address" && <ManageAddress />}
-          {activeTab === "reviews" && <MyReviews />}
-        </div>
-      </div>
+      <button
+        onClick={handleSave}
+        className="bg-black text-white px-5 py-2 rounded"
+      >
+        Save Changes
+      </button>
     </div>
   );
 }

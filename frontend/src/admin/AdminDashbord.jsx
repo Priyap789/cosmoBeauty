@@ -39,7 +39,7 @@ import {
 
 /* ================= CONFIG ================= */
 const API_URL = "http://localhost:8000/api/products";
-const CUSTOMER_API = "http://localhost:8000/api/admin/customers";
+const CUSTOMER_API = "http://localhost:8000/api/admin/users";
 const IMAGE_BASE = "http://localhost:8000";
 
 /* ================= CATEGORY DATA ================= */
@@ -58,7 +58,7 @@ const CATEGORY_MAP = {
 
 const drawerWidth = 240;
 
-/* ================= MAIN ================= */
+/* ========= ======== MAIN ================= */
 export default function AdminDashboard() {
   const [active, setActive] = useState("dashboard");
   const [totalProducts, setTotalProducts] = useState(0);
@@ -98,7 +98,13 @@ export default function AdminDashboard() {
             onClick={() => setActive("products")}
           />
           <SidebarItem icon={<ShoppingCart />} label="Orders" />
-          <SidebarItem icon={<People />} label="Users" />
+          <SidebarItem
+            icon={<People />}
+            label="Users"
+            active={active === "users"}
+            onClick={() => setActive("users")}
+          />
+
         </List>
 
         <Button startIcon={<Logout />} sx={{ m: 2 }} variant="outlined">
@@ -108,6 +114,8 @@ export default function AdminDashboard() {
 
       {/* MAIN */}
       <Box sx={{ flexGrow: 1, p: 3 }}>
+        {active === "users" && <Customers />}
+
         {active === "dashboard" && (
           <Paper sx={{ p: 3, width: 260 }}>
             <Typography color="text.secondary">Total Products</Typography>
@@ -132,70 +140,68 @@ function SidebarItem({ icon, label, active, onClick }) {
 }
 /* ================= CUSTOMERS ================= */
 function Customers() {
-
   const [customers, setCustomers] = useState([]);
 
-  const fetchCustomers = async () => {
-    const res = await fetch(CUSTOMER_API);
-    const data = await res.json();
-    setCustomers(data);
-  };
-
   useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+
+        const res = await fetch(CUSTOMER_API, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setCustomers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchCustomers();
   }, []);
 
   return (
     <>
-      <Typography variant="h5" mb={2}>
-        Customers
-      </Typography>
+      <Typography variant="h5" mb={2}>Customers</Typography>
 
       <TableContainer component={Paper}>
         <Table>
-
           <TableHead>
             <TableRow>
-              <TableCell>Avatar</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Mobile</TableCell>
-              <TableCell>Gender</TableCell>
               <TableCell>Joined</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {customers.map((c) => (
-              <TableRow key={c._id}>
-
-                <TableCell>
-                  <Avatar>
-                    {c.firstName?.charAt(0)}
-                  </Avatar>
+            {customers.length > 0 ? (
+              customers.map((u) => (
+                <TableRow key={u._id}>
+                  <TableCell>{u.name}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    {new Date(u.createdAt).toLocaleDateString()}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  No users found
                 </TableCell>
-
-                <TableCell>
-                  {c.firstName} {c.lastName}
-                </TableCell>
-
-                <TableCell>{c.email}</TableCell>
-                <TableCell>{c.mobile}</TableCell>
-                <TableCell>{c.gender}</TableCell>
-
-                <TableCell>
-                  {new Date(c.createdAt).toLocaleDateString()}
-                </TableCell>
-
               </TableRow>
-            ))}
+            )}
           </TableBody>
-
         </Table>
       </TableContainer>
     </>
   );
 }
+
 
 
 /* ================= PRODUCTS ================= */
@@ -206,16 +212,22 @@ function Products({ updateTotal }) {
   const [editingId, setEditingId] = useState(null);
 
   const [product, setProduct] = useState({
-    name: "",
-    price: "",
-    mainCategory: "",
-    subCategory: "",
-    description: "",
-    ingredients: "",
-    howToUse: "",
-    imageFiles: [],
-    mainImageIndex: 0, // ✅ Track main image
-  });
+  name: "",
+  price: "",
+  mainCategory: "",
+  subCategory: "",
+  description: "",
+  ingredients: "",
+  howToUse: "",
+  imageFiles: [],
+  mainImageIndex: 0,
+
+  // 🔥 OFFER FIELDS
+  discountPercentage: "",
+  isActive: false,
+  startDate: "",
+  endDate: "",
+});
 
   const [filterMainCategory, setFilterMainCategory] = useState("");
   const [filterSubCategory, setFilterSubCategory] = useState("");
@@ -230,7 +242,7 @@ function Products({ updateTotal }) {
   useEffect(() => {
     fetchProducts();
   }, []);
-
+              
   const filteredProducts = products.filter((p) => {
     if (filterMainCategory && filterSubCategory)
       return (
@@ -243,60 +255,82 @@ function Products({ updateTotal }) {
 
   /* ================= SAVE ================= */
   const handleSave = async () => {
-    const formData = new FormData();
-    formData.append("name", product.name);
-    formData.append("price", product.price);
-    formData.append("mainCategory", product.mainCategory);
-    formData.append("subCategory", product.subCategory);
-    formData.append("description", product.description);
-    formData.append("ingredients", product.ingredients);
-    formData.append("howToUse", product.howToUse);
+  const formData = new FormData();
 
-    // MULTIPLE IMAGE UPLOAD
-    product.imageFiles.forEach((img, idx) => {
-      formData.append("images", img);
-      if (idx === 0) formData.append("mainImage", img.name); // optional if backend tracks main image
-    });
+  formData.append("name", product.name);
+  formData.append("price", product.price);
+  formData.append("mainCategory", product.mainCategory);
+  formData.append("subCategory", product.subCategory);
+  formData.append("description", product.description);
+  formData.append("ingredients", product.ingredients);
+  formData.append("howToUse", product.howToUse);
 
-    const url = editingId ? `${API_URL}/${editingId}` : API_URL;
-    const method = editingId ? "PUT" : "POST";
+  // 🔥 OFFER DATA
+  formData.append("discountPercentage", product.discountPercentage);
+  formData.append("isActive", product.isActive);
+  formData.append("startDate", product.startDate);
+  formData.append("endDate", product.endDate);
 
-    await fetch(url, { method, body: formData });
-    resetForm();
-    fetchProducts();
-  };
+  product.imageFiles.forEach((img) => {
+    formData.append("images", img);
+  });
+
+  const url = editingId ? `${API_URL}/${editingId}` : API_URL;
+  const method = editingId ? "PUT" : "POST";
+
+  await fetch(url, { method, body: formData });
+
+  resetForm();
+  fetchProducts();
+};
 
   const openEdit = (p) => {
-    setEditingId(p._id);
-    setProduct({
-      name: p.name,
-      price: p.price,
-      mainCategory: p.mainCategory,
-      subCategory: p.subCategory,
-      description: p.description,
-      ingredients: p.ingredients?.join(", ") || "",
-      howToUse: p.howToUse || "",
-      imageFiles: [], // new uploads
-      mainImageIndex: 0, // first image is main
-    });
-    setOpen(true);
-  };
+  setEditingId(p._id);
+
+  setProduct({
+    name: p.name,
+    price: p.price,
+    mainCategory: p.mainCategory,
+    subCategory: p.subCategory,
+    description: p.description,
+    ingredients: p.ingredients?.join(", ") || "",
+    howToUse: p.howToUse || "",
+    imageFiles: [],
+    mainImageIndex: 0,
+
+    // 🔥 Load Offer Data
+    discountPercentage: p.offer?.discountPercentage || "",
+    isActive: p.offer?.isActive || false,
+    startDate: p.offer?.startDate?.split("T")[0] || "",
+    endDate: p.offer?.endDate?.split("T")[0] || "",
+  });
+
+  setOpen(true);
+};
+
 
   const resetForm = () => {
-    setOpen(false);
-    setEditingId(null);
-    setProduct({
-      name: "",
-      price: "",
-      mainCategory: "",
-      subCategory: "",
-      description: "",
-      ingredients: "",
-      howToUse: "",
-      imageFiles: [],
-      mainImageIndex: 0,
-    });
-  };
+  setOpen(false);
+  setEditingId(null);
+
+  setProduct({
+    name: "",
+    price: "",
+    mainCategory: "",
+    subCategory: "",
+    description: "",
+    ingredients: "",
+    howToUse: "",
+    imageFiles: [],
+    mainImageIndex: 0,
+
+    discountPercentage: "",
+    isActive: false,
+    startDate: "",
+    endDate: "",
+  });
+};
+
 
   return (
     <>
@@ -359,13 +393,32 @@ function Products({ updateTotal }) {
             {filteredProducts.map((p) => (
               <TableRow key={p._id}>
                 <TableCell>{p.name}</TableCell>
-                <TableCell>₹{p.price}</TableCell>
+                <TableCell>
+  {p.offer?.isActive ? (
+    <>
+      <span style={{ textDecoration: "line-through", color: "gray" }}>
+        ₹{p.price}
+      </span>
+      <br />
+      <span style={{ color: "red", fontWeight: "bold" }}>
+        ₹{p.offer.offerPrice}
+      </span>
+      <br />
+      <small style={{ color: "green" }}>
+        {p.offer.discountPercentage}% OFF
+      </small>
+    </>
+  ) : (
+    <>₹{p.price}</>
+  )}
+</TableCell>
+
                 <TableCell>
                   {p.mainCategory}
                   <br />
                   <small>{p.subCategory}</small>
                 </TableCell>
-
+                
                 {/* MAIN IMAGE PREVIEW */}
                 <TableCell align="center">
                   <Avatar
@@ -421,6 +474,75 @@ function Products({ updateTotal }) {
               setProduct({ ...product, name: e.target.value })
             }
           />
+{/* ================= OFFER SECTION ================= */}
+<Typography sx={{ mt: 2, fontWeight: "bold" }}>
+  Offer Settings
+</Typography>
+
+<TextField
+  label="Discount %"
+  type="number"
+  fullWidth
+  margin="dense"
+  value={product.discountPercentage || ""}
+  onChange={(e) =>
+    setProduct({
+      ...product,
+      discountPercentage: e.target.value,
+    })
+  }
+/>
+
+<Select
+  fullWidth
+  value={product.isActive ? "true" : "false"}
+  onChange={(e) =>
+    setProduct({
+      ...product,
+      isActive: e.target.value === "true",
+    })
+  }
+  sx={{ mt: 2 }}
+>
+  <MenuItem value="false">Offer Disabled</MenuItem>
+  <MenuItem value="true">Activate Offer</MenuItem>
+</Select>
+
+<TextField
+  label="Start Date"
+  type="date"
+  fullWidth
+  margin="dense"
+  value={product.startDate || ""}
+  onChange={(e) =>
+    setProduct({
+      ...product,
+      startDate: e.target.value,
+    })
+  }
+  slotProps={{
+    inputLabel: { shrink: true },
+  }}
+/>
+
+<TextField
+  label="End Date"
+  type="date"
+  fullWidth
+  margin="dense"
+  value={product.endDate || ""}
+  onChange={(e) =>
+    setProduct({
+      ...product,
+      endDate: e.target.value,
+    })
+  }
+  slotProps={{
+    inputLabel: { shrink: true },
+  }}
+/>
+
+
           <TextField
             label="Price"
             fullWidth

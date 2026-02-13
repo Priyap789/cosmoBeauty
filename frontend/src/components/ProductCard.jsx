@@ -1,14 +1,15 @@
-import { ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../redux/cartSlice";
+import StarDisplay from "./StarDisplay";
 
 const IMAGE_BASE = "http://localhost:8000";
 
 function ProductCard({ product }) {
   const dispatch = useDispatch();
 
-  /* ✅ PICK ONLY ONE MAIN IMAGE */
+  /* ================= IMAGE ================= */
   const mainImage =
     product.images && product.images.length > 0
       ? product.images[0]
@@ -20,11 +21,35 @@ function ProductCard({ product }) {
       : `${IMAGE_BASE}${mainImage}`
     : "/placeholder.png";
 
+  /* ================= OFFER LOGIC ================= */
+  /* ================= OFFER LOGIC ================= */
+const today = new Date();
+
+const isOfferActive =
+  product.offer?.isActive &&
+  product.offer?.discountPercentage > 0 &&
+  (!product.offer?.startDate ||
+    new Date(product.offer.startDate) <= today) &&
+  (!product.offer?.endDate ||
+    new Date(product.offer.endDate) >= today);
+
+const discountedPrice = isOfferActive
+  ? product.offer.offerPrice
+  : product.price;
+
+
+  /* ================= ADD TO CART ================= */
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    dispatch(addToCart({ ...product, quantity: 1 }));
+    dispatch(
+      addToCart({
+        ...product,
+        price: discountedPrice, // 🔥 add discounted price to cart
+        quantity: 1,
+      })
+    );
   };
 
   return (
@@ -46,6 +71,14 @@ function ProductCard({ product }) {
               {product.mainCategory}
             </span>
           )}
+
+          {/* 🔥 OFFER BADGE */}
+          {isOfferActive && (
+            <span className="absolute top-3 right-3 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+              {product.offer?.discountPercentage}% OFF
+
+            </span>
+          )}
         </div>
 
         {/* CONTENT */}
@@ -61,17 +94,29 @@ function ProductCard({ product }) {
           )}
 
           {/* RATING */}
-          <div className="flex items-center gap-1 text-sm mt-1">
-            <Star size={14} className="text-yellow-400 fill-yellow-400" />
-            <span>4.5</span>
-            <span className="text-gray-400">(120)</span>
-          </div>
+          <StarDisplay
+            rating={product.rating}
+            count={product.numReviews}
+          />
 
           {/* PRICE + CART */}
           <div className="flex items-center justify-between mt-4">
-            <span className="font-bold text-gray-800">
-              ₹{product.price}
-            </span>
+            <div>
+              {isOfferActive ? (
+                <>
+                  <span className="text-sm text-gray-400 line-through mr-2">
+                    ₹{product.price}
+                  </span>
+                  <span className="font-bold text-red-600">
+                    ₹{discountedPrice}
+                  </span>
+                </>
+              ) : (
+                <span className="font-bold text-gray-800">
+                  ₹{product.price}
+                </span>
+              )}
+            </div>
 
             <button
               onClick={handleAddToCart}

@@ -23,7 +23,7 @@ import AboutUs from "./pages/aboutus";
 import ContectUs from "./pages/contactus";
 import { Toaster } from "react-hot-toast"; // ✅ ADD THIS
 import ContactUs from "./pages/contactus";
-
+import Customers from "./admin/Customers";
 import PrivacyPolicy from "./pages/privacypolicy";
 import TermsConditions from "./pages/termsconditions";
 import AdminDashbord from "./admin/AdminDashbord"
@@ -59,8 +59,9 @@ function App() {
           <Route path="/contactus" element={<ContactUs />} />
           <Route path="/privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/termsconditions" element={<TermsConditions />} />
-          
+          <Route path="/admin/customers" element={<Customers />} />
           <Route path="/ProtectedRoute" element={<ProtectedRoute />} />
+          
 
         </Route>
         <Route path="/admin/dashbord" element={<AdminDashbord/>}/>

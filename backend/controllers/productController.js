@@ -12,6 +12,18 @@ const addProduct = async (req, res) => {
       ? req.body.ingredients.split(",").map((i) => i.trim())
       : [];
 
+    // 🔥 Offer logic
+    const discountPercentage = Number(req.body.discountPercentage) || 0;
+    const isActive = req.body.isActive === "true" || req.body.isActive === true;
+
+    let offerPrice = null;
+
+    if (isActive && discountPercentage > 0) {
+      offerPrice =
+        req.body.price -
+        (req.body.price * discountPercentage) / 100;
+    }
+
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
@@ -19,8 +31,17 @@ const addProduct = async (req, res) => {
       subCategory: req.body.subCategory,
       description: req.body.description,
       images: imagePaths,
-      ingredients: ingredientsArray,       // NEW
-      howToUse: req.body.howToUse || "",   // NEW
+      ingredients: ingredientsArray,
+      howToUse: req.body.howToUse || "",
+
+      // 🔥 Offer object
+      offer: {
+        discountPercentage,
+        offerPrice,
+        isActive,
+        startDate: req.body.startDate || null,
+        endDate: req.body.endDate || null,
+      },
     });
 
     await product.save();
@@ -38,6 +59,28 @@ const addProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await Product.find();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/* ================= GET OFFER PRODUCTS ONLY ================= */
+const getOfferProducts = async (req, res) => {
+  try {
+    const today = new Date();
+
+    const products = await Product.find({
+      "offer.isActive": true,
+      $or: [
+        { "offer.startDate": null },
+        {
+          "offer.startDate": { $lte: today },
+          "offer.endDate": { $gte: today },
+        },
+      ],
+    });
+
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,8 +119,30 @@ const updateProduct = async (req, res) => {
 
     // Update images if new ones uploaded
     if (req.files && req.files.length > 0) {
-      updatedData.images = req.files.map((file) => `/uploads/${file.filename}`);
+      updatedData.images = req.files.map(
+        (file) => `/uploads/${file.filename}`
+      );
     }
+
+    // 🔥 Offer update logic
+    const discountPercentage = Number(req.body.discountPercentage) || 0;
+    const isActive = req.body.isActive === "true" || req.body.isActive === true;
+
+    let offerPrice = null;
+
+    if (isActive && discountPercentage > 0) {
+      offerPrice =
+        req.body.price -
+        (req.body.price * discountPercentage) / 100;
+    }
+
+    updatedData.offer = {
+      discountPercentage,
+      offerPrice,
+      isActive,
+      startDate: req.body.startDate || null,
+      endDate: req.body.endDate || null,
+    };
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -111,6 +176,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
   addProduct,
   getProducts,
+  getOfferProducts, // 🔥 NEW
   getProductById,
   updateProduct,
   deleteProduct,

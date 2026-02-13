@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addToCart } from "../../redux/cartSlice";
-import { Star } from "lucide-react";
+//import { Star } from "lucide-react";
 import toast from "react-hot-toast";
+import StarDisplay from "../../components/StarDisplay";
+
 
 const API_URL = "http://localhost:8000/api/products";
 
@@ -54,15 +56,29 @@ export default function ProductDetail() {
 
   /* ---------- ADD TO CART ---------- */
   const handleAddToCart = () => {
-    dispatch(addToCart({ ...product, quantity }));
-    toast.success(`${quantity} ${product.name} added to cart!`);
-  };
+  dispatch(
+    addToCart({
+      ...product,
+      price: discountedPrice,
+      quantity,
+    })
+  );
+  toast.success(`${quantity} ${product.name} added to cart!`);
+};
+
 
   /* ---------- BUY NOW ---------- */
   const handleBuyNow = () => {
-    dispatch(addToCart({ ...product, quantity }));
-    navigate("/cart");
-  };
+  dispatch(
+    addToCart({
+      ...product,
+      price: discountedPrice,
+      quantity,
+    })
+  );
+  navigate("/cart");
+};
+
 
   /* ---------- IMAGE URL ---------- */
   const getImageUrl = (img) => {
@@ -81,6 +97,39 @@ export default function ProductDetail() {
     return (
       <p className="text-center py-10 text-gray-500">Product not found</p>
     );
+
+/* ---------- OFFER LOGIC ---------- */
+/* ---------- OFFER LOGIC ---------- */
+const today = new Date();
+
+const startDate = product.offer?.startDate
+  ? new Date(product.offer.startDate)
+  : null;
+
+const endDate = product.offer?.endDate
+  ? new Date(product.offer.endDate)
+  : null;
+
+const isOfferActive =
+  product.offer?.isActive &&
+  product.offer?.discountPercentage > 0 &&
+  (!startDate || startDate <= today) &&
+  (!endDate || endDate >= today);
+
+const isUpcoming =
+  product.offer?.isActive &&
+  startDate &&
+  startDate > today;
+
+const isExpired =
+  product.offer?.isActive &&
+  endDate &&
+  endDate < today;
+
+const discountedPrice = isOfferActive
+  ? product.offer?.offerPrice
+  : product.price;
+
 
   const images = product.images || [];
 
@@ -126,13 +175,56 @@ export default function ProductDetail() {
         <h1 className="text-3xl font-semibold">{product.name}</h1>
 
         {/* RATING */}
-        <div className="flex items-center gap-2">
-          <Star className="text-yellow-400" />
-          <span>4.5 (120 reviews)</span>
-        </div>
+        <StarDisplay
+        rating={product.rating}
+        count={product.numReviews}
+        />
+
 
         {/* PRICE */}
-        <p className="text-2xl font-bold">₹{product.price}</p>
+        {/* OFFER STATUS MESSAGE */}
+{product.offer?.isActive && product.offer?.startDate && (
+  <div className="mt-2 text-sm">
+    {new Date(product.offer.startDate) > new Date() ? (
+      <p className="text-yellow-600 font-medium">
+        🟡 Offer starts on{" "}
+        {new Date(product.offer.startDate).toLocaleDateString()}
+      </p>
+    ) : new Date(product.offer.endDate) < new Date() ? (
+      <p className="text-gray-500 font-medium">
+        🔴 Offer expired on{" "}
+        {new Date(product.offer.endDate).toLocaleDateString()}
+      </p>
+    ) : (
+      <p className="text-green-600 font-medium">
+        🟢 Offer valid till{" "}
+        {new Date(product.offer.endDate).toLocaleDateString()}
+      </p>
+    )}
+  </div>
+)}
+
+        <div className="flex items-center gap-3">
+  {isOfferActive ? (
+    <>
+      <span className="text-gray-400 line-through text-lg">
+        ₹{product.price}
+      </span>
+      <span className="text-3xl font-bold text-red-600">
+        ₹{discountedPrice}
+      </span>
+      <span className="bg-red-500 text-white text-sm px-2 py-1 rounded">
+        {product.offer?.discountPercentage}% OFF
+
+      </span>
+    </>
+  ) : (
+    <span className="text-2xl font-bold">
+      ₹{product.price}
+    </span>
+  )}
+</div>
+
 
         {/* QUANTITY */}
         <div className="flex items-center gap-4 mt-4">

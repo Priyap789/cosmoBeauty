@@ -1,33 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Hero from "../../components/Hero";
 import LoginForm from "../../components/LoginForm";
 import SignupForm from "../../components/SignupForm";
-//import Cart from "../../components/Cart";
 import Features from "../../components/Features";
 import Footer from "../../components/Footer";
 import SliderSection from "../../components/SliderSection";
 import SpecialOffers from "../../components/SpecialOffers";
 
-
-
-
-
-
 function Home() {
   const [popupType, setPopupType] = useState(null); // "login" | "signup" | null
-  const [showCart, setShowCart] = useState(false);
+
+  // ✅ AUTO OPEN LOGIN IF resetToken EXISTS
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("resetToken");
+
+    if (token) {
+      // small timeout ensures component fully loads
+      setTimeout(() => {
+        setPopupType("login");
+      }, 100);
+    }
+  }, []);
 
   return (
     <>
-      {/*Navbar*/}
-      
-      <SliderSection/>
+      <SliderSection />
       <Hero />
-      <SpecialOffers/>
-      <Features/>
-      
-      
+      <SpecialOffers />
+      <Features />
 
       {/* LOGIN / SIGNUP POPUP */}
       {popupType && (
@@ -49,7 +51,6 @@ function Home() {
 
         </div>
       )}
-
     </>
   );
 }

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Mail, Lock } from "lucide-react";
 import Input from "./input";
 import Button from "./Button";
+import ForgotPassword from "./ForgotPassword";
+import ResetPassword from "./ResetPassword";
 
 function LoginForm({ onClose, switchToSignup }) {
 
@@ -11,27 +13,23 @@ function LoginForm({ onClose, switchToSignup }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [popup, setPopup] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
   const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
-  // ---------------- HANDLE INPUT ----------------
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ---------------- HANDLE LOGIN ----------------
+  // ✅ LOGIN SUBMIT
   const handleSubmit = async (e) => {
-
     e.preventDefault();
     setLoading(true);
     setError("");
-    setMessage("");
 
     try {
-
       const response = await fetch(
         "http://localhost:8000/api/auth/login",
         {
@@ -43,57 +41,76 @@ function LoginForm({ onClose, switchToSignup }) {
 
       const data = await response.json();
 
-      // ❌ Error Handling
       if (!response.ok) {
-        setError(data.msg || "Login failed");
+        setError(data.message || "Login failed");
         return;
       }
 
-      // ✅ Success Handling
-      setMessage("Login successful!");
-
-      // Store token
       localStorage.setItem("token", data.token);
-
-      // Store role
       localStorage.setItem("role", data.role);
 
-      // Reset form
-      setFormData({ email: "", password: "" });
+      setPopup(true);
 
-      onClose();
-
-      // ✅ Role Based Redirect
-      if (data.role === "admin") {
-        window.location.href = "/admin/dashboard";
-      } else {
-        window.location.href = "/";
-      }
+      setTimeout(() => {
+        onClose();
+        window.location.href =
+          data.role === "admin" ? "/admin/dashboard" : "/";
+      }, 1500);
 
     } catch (err) {
-      console.error(err);
-      setError("Server error. Try again.");
+      setError("Server error");
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ WHEN OTP SENT → OPEN RESET POPUP
+  const handleOtpSent = (email) => {
+    setResetEmail(email);
+    setShowForgot(false);
+    setShowReset(true);
+  };
+
+  // ✅ SHOW RESET PASSWORD POPUP
+  if (showReset) {
+    return (
+      <ResetPassword
+        email={resetEmail}
+        onBack={() => {
+          setShowReset(false);
+          setShowForgot(false);
+        }}
+      />
+    );
+  }
+
+  // ✅ SHOW FORGOT PASSWORD POPUP
+  if (showForgot) {
+    return (
+      <ForgotPassword
+        onBack={() => setShowForgot(false)}
+        onOtpSent={handleOtpSent}
+      />
+    );
+  }
+
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg relative">
 
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 text-gray-500 hover:text-pink-600"
-      >
-        ✕
-      </button>
+      {!popup && (
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-pink-600"
+        >
+          ✕
+        </button>
+      )}
 
       <h2 className="text-2xl font-bold text-center text-pink-700 mb-6">
         Login
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <Input
           type="email"
           name="email"
@@ -118,27 +135,32 @@ function LoginForm({ onClose, switchToSignup }) {
           text={loading ? "Signing In..." : "Sign In"}
           type="submit"
         />
-
       </form>
 
-      {message && (
-        <p className="text-center text-green-500 mt-2">{message}</p>
-      )}
-
       {error && (
-        <p className="text-center text-red-500 mt-2">{error}</p>
+        <p className="text-red-600 text-center mt-3 text-sm">
+          {error}
+        </p>
       )}
 
-      <p className="text-center mt-4 text-sm">
-        Don’t have an account?
-        <button
-          onClick={switchToSignup}
-          className="text-pink-600 ml-1 font-medium"
-        >
-          Sign Up
-        </button>
+      <p
+        onClick={() => setShowForgot(true)}
+        className="text-sm text-center mt-3 text-pink-600 cursor-pointer hover:underline"
+      >
+        Forgot password?
       </p>
 
+      {!popup && (
+        <p className="text-center mt-4 text-sm">
+          Don’t have an account?
+          <button
+            onClick={switchToSignup}
+            className="text-pink-600 ml-1 font-medium"
+          >
+            Sign Up
+          </button>
+        </p>
+      )}
     </div>
   );
 }

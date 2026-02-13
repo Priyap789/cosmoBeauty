@@ -3,7 +3,7 @@ import React from "react";
 const SpecialOffers = () => {
   return (
     <section className="w-full px-4">
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 py-14">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-pink-300 via-fuchsia-600 to-purple-200 py-14">
 
         {/* Header */}
         <div className="text-center text-white">
