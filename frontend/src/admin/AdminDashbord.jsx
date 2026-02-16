@@ -62,16 +62,36 @@ const drawerWidth = 240;
 export default function AdminDashboard() {
   const [active, setActive] = useState("dashboard");
   const [totalProducts, setTotalProducts] = useState(0);
-
+  const [totalUsers, setTotalUsers] = useState(0);
+  
   const fetchTotalProducts = async () => {
-    const res = await fetch(`${API_URL}`);
-    const data = await res.json();
-    setTotalProducts(data.length);
-  };
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  setTotalProducts(data.length);
+};
 
-  useEffect(() => {
-    fetchTotalProducts();
-  }, []);
+const fetchTotalUsers = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(CUSTOMER_API, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    setTotalUsers(data.length);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+useEffect(() => {
+  fetchTotalProducts();
+  fetchTotalUsers();
+}, []);
+
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
@@ -117,11 +137,29 @@ export default function AdminDashboard() {
         {active === "users" && <Customers />}
 
         {active === "dashboard" && (
-          <Paper sx={{ p: 3, width: 260 }}>
-            <Typography color="text.secondary">Total Products</Typography>
-            <Typography variant="h4">{totalProducts}</Typography>
-          </Paper>
-        )}
+  <Box display="flex" gap={3}>
+
+    <Paper sx={{ p: 3, width: 260 }}>
+      <Typography color="text.secondary">
+        Total Products
+      </Typography>
+      <Typography variant="h4">
+        {totalProducts}
+      </Typography>
+    </Paper>
+
+    <Paper sx={{ p: 3, width: 260 }}>
+      <Typography color="text.secondary">
+        Total Users
+      </Typography>
+      <Typography variant="h4">
+        {totalUsers}
+      </Typography>
+    </Paper>
+
+  </Box>
+)}
+
 
         {active === "products" && <Products updateTotal={fetchTotalProducts} />}
       </Box>
@@ -142,6 +180,35 @@ function SidebarItem({ icon, label, active, onClick }) {
 function Customers() {
   const [customers, setCustomers] = useState([]);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
+  //  DELETE FUNCTION 
+  const handleDeleteUser = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await fetch(`http://localhost:8000/api/admin/users/${selectedUserId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    setCustomers((prev) =>
+      prev.filter((user) => user._id !== selectedUserId)
+    );
+
+    setDeleteDialogOpen(false);
+    setSelectedUserId(null);
+
+  } catch (error) {
+    console.error("Delete failed", error);
+  }
+};
+
+
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -159,6 +226,7 @@ function Customers() {
         console.error(err);
       }
     };
+    
 
     fetchCustomers();
   }, []);
@@ -170,23 +238,46 @@ function Customers() {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Joined</TableCell>
-            </TableRow>
-          </TableHead>
+  <TableRow>
+    <TableCell>Name</TableCell>
+    <TableCell>Email</TableCell>
+    <TableCell>Mobile</TableCell>
+    <TableCell>City</TableCell>
+    <TableCell>Address</TableCell>
+    <TableCell>Pincode</TableCell>
+    <TableCell>Joined</TableCell>
+    <TableCell>Action</TableCell>
+  </TableRow>
+</TableHead>
+
 
           <TableBody>
             {customers.length > 0 ? (
               customers.map((u) => (
                 <TableRow key={u._id}>
-                  <TableCell>{u.name}</TableCell>
-                  <TableCell>{u.email}</TableCell>
-                  <TableCell>
-                    {new Date(u.createdAt).toLocaleDateString()}
-                  </TableCell>
-                </TableRow>
+  <TableCell>{u.name}</TableCell>
+  <TableCell>{u.email}</TableCell>
+  <TableCell>{u.mobile || "-"}</TableCell>
+  <TableCell>{u.addresses?.[0]?.city || "-"}</TableCell>
+  <TableCell>{u.addresses?.[0]?.address || "-"}</TableCell>
+  <TableCell>{u.addresses?.[0]?.pincode || "-"}</TableCell>
+  <TableCell>
+    {new Date(u.createdAt).toLocaleDateString()}
+  </TableCell>
+  <TableCell>
+    <IconButton
+      color="error"
+      onClick={() => {
+        setSelectedUserId(u._id);
+        setDeleteDialogOpen(true);
+}}
+
+    >
+      <Delete />
+    </IconButton>
+  </TableCell>
+</TableRow>
+
               ))
             ) : (
               <TableRow>
@@ -198,6 +289,35 @@ function Customers() {
           </TableBody>
         </Table>
       </TableContainer>
+      <Dialog
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  <DialogTitle>Delete User</DialogTitle>
+
+  <DialogContent>
+    <Typography>
+      Are you sure you want to delete this user?
+    </Typography>
+  </DialogContent>
+
+  <DialogActions>
+    <Button
+      onClick={() => setDeleteDialogOpen(false)}
+    >
+      Cancel
+    </Button>
+
+    <Button
+      color="error"
+      variant="contained"
+      onClick={handleDeleteUser}
+    >
+      Yes, Delete
+    </Button>
+  </DialogActions>
+</Dialog>
+
     </>
   );
 }
@@ -232,16 +352,21 @@ function Products({ updateTotal }) {
   const [filterMainCategory, setFilterMainCategory] = useState("");
   const [filterSubCategory, setFilterSubCategory] = useState("");
 
+    
   const fetchProducts = async () => {
     const res = await fetch(API_URL);
     const data = await res.json();
     setProducts(data);
     updateTotal();
   };
+ 
+  
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+  fetchProducts();
+}, []);
+
+
               
   const filteredProducts = products.filter((p) => {
     if (filterMainCategory && filterSubCategory)
@@ -252,6 +377,7 @@ function Products({ updateTotal }) {
     if (filterMainCategory) return p.mainCategory === filterMainCategory;
     return true;
   });
+  
 
   /* ================= SAVE ================= */
   const handleSave = async () => {

@@ -3,25 +3,25 @@ const sliderData = [
     id: 1,
     title: "Glow Your Skin",
     subtitle: "Up to 40% Off",
-    image: "/image/home4.jpg",
+    image: "/image/haircare.jpg",
   },
   {
     id: 2,
     title: "Makeup Essentials",
     subtitle: "New Collection",
-    image: "/image/home2.jpg",
+    image: "/image/makeup.jpg",
   },
   {
     id: 3,
     title: "Hair Care Products",
     subtitle: "Flat 30% Off",
-    image: "/image/home3.jpg",
+    image: "/image/bodycare.jpg",
   },
   {
     id: 3,
     title: "Hair Care Products",
     subtitle: "Flat 30% Off",
-    image: "/image/home1.jpg",
+    image: "/image/skinecare.jpg",
   },
 
 ];

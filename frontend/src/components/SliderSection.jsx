@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import sliderData from "../data/sliderData";
-import Button from "./Button";
 
 function SliderSection() {
   const [current, setCurrent] = useState(0);
@@ -10,72 +9,59 @@ function SliderSection() {
     setCurrent((prev) => (prev === total - 1 ? 0 : prev + 1));
   };
 
-  const prevSlide = () => {
-    setCurrent((prev) => (prev === 0 ? total - 1 : prev - 1));
-  };
-
-  // 🔁 Auto slide (SUGAR-like)
   useEffect(() => {
-    const timer = setInterval(nextSlide, 4000);
+    const timer = setInterval(nextSlide, 5000);
     return () => clearInterval(timer);
   }, [current]);
 
   return (
-    <section className="relative w-full bg-white overflow-hidden">
-
-      {/* Slider height */}
-      <div className="h-[220px] sm:h-[320px] md:h-[420px] lg:h-[520px]">
-
+    <section className="relative w-full overflow-hidden bg-[#f3f3f3]">
+      {/* Container using Aspect Ratio instead of fixed heights.
+        Mobile: 16/9 | Tablet: 21/9 | Desktop: 3/1 (Wide Banner)
+      */}
+      <div className="relative w-full aspect-[16/9] md:aspect-[21/9] lg:aspect-[3/1]">
+        
         {/* Slider Track */}
         <div
-          className="flex h-full transition-transform duration-700 ease-in-out"
+          className="flex h-full transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
-          {sliderData.map((slide) => (
-            <div
-              key={slide.id}
-              className="min-w-full h-full flex items-center justify-center"
+          {sliderData.map((slide, index) => (
+            <a 
+              key={slide.id} 
+              href={slide.link} 
+              className="min-w-full h-full block"
             >
-              {/* Proper image display (NO crop) */}
               <img
                 src={slide.image}
                 alt={slide.title}
-                className="h-full w-auto max-w-full object-contain"
+                // 'object-contain' ensures the whole image is visible
+                // 'w-full h-full' ensures it fills the aspect-ratio box
+                className="w-full h-full object-contain md:object-cover" 
+                loading={index === 0 ? "eager" : "lazy"}
               />
-            </div>
+            </a>
           ))}
         </div>
-      </div>
 
-      {/* Left Arrow */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-50">
-        <Button
-          text="❮"
-          onClick={prevSlide}
-          className="bg-black/70 hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center"
-        />
-      </div>
-
-      {/* Right Arrow */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 z-50">
-        <Button
-          text="❯"
-          onClick={nextSlide}
-          className="bg-black/70 hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center"
-        />
-      </div>
-
-      {/* Dots (SUGAR style) */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-        {sliderData.map((_, index) => (
-          <span
-            key={index}
-            onClick={() => setCurrent(index)}
-            className={`w-2.5 h-2.5 rounded-full cursor-pointer transition ${
-              current === index ? "bg-black" : "bg-gray-300"
-            }`}
-          />
-        ))}
+        {/* Navigation Indicators */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2">
+          {sliderData.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrent(index)}
+              className="p-2 focus:outline-none"
+            >
+              <div
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  current === index 
+                    ? "w-8 bg-black" 
+                    : "w-4 bg-black/20 hover:bg-black/40"
+                }`}
+              />
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -36,14 +36,15 @@ function Hero() {
         </div>
       </div>
 
-      {/* Right Image */}
-      <div className="md:w-1/2 mt-8 md:mt-0 flex justify-center">
-        <img
-          src="/image/logo.png"   
-          alt="Beauty Products"
-          className="rounded-xl lg:w-80 w-48"
-        />
-      </div>
+      {/* Right Image */}{/* Right Image Container */}
+<div className="md:w-1/2 mt-8 md:mt-0 flex justify-center items-center">
+  <img
+    src="/image/image2_homepage.jpg"
+    alt="Must have personal care products"
+    className="rounded-xl w-full max-w-2xl h-auto object-cover shadow-lg"
+  />
+</div>
+      
 
     </section>
   );
