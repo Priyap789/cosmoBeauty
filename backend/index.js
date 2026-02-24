@@ -39,11 +39,12 @@ app.use("/api/products", require("./routes/productRoutes"));
 app.use("/api/contact", require("./routes/contactRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 app.use("/api/reviews", require("./routes/reviewRoutes"));
-
+app.use("/api/cart", require("./routes/cartRoutes"));
+app.use("/api/checkout", require("./routes/checkoutRoutes"));
 //app.use("/admin", require("./routes/adminAuthRoutes"));
 app.use("/api/profile", require("./routes/profileRoutes"));
 //app.use("/api/admin", require("./routes/adminRoutes"));
-
+app.use("/api/admin/orders", require("./routes/adminOrders"));
 // Start server and connect to DB
 app.listen(port, async () => {
   await connectDB();

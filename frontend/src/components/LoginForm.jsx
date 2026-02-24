@@ -48,7 +48,8 @@ function LoginForm({ onClose, switchToSignup }) {
       }
 
       localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+      localStorage.setItem("userId", data.userId);
+
 
       setPopup(true);
 

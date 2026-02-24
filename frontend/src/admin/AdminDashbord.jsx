@@ -35,12 +35,15 @@ import {
   Edit,
   Delete,
   Close,
+  Mail,
 } from "@mui/icons-material";
 
 /* ================= CONFIG ================= */
 const API_URL = "http://localhost:8000/api/products";
 const CUSTOMER_API = "http://localhost:8000/api/admin/users";
 const IMAGE_BASE = "http://localhost:8000";
+const res = await fetch("http://localhost:8000/api/admin/contacts");
+
 
 /* ================= CATEGORY DATA ================= */
 const CATEGORY_MAP = {
@@ -117,13 +120,26 @@ useEffect(() => {
             active={active === "products"}
             onClick={() => setActive("products")}
           />
-          <SidebarItem icon={<ShoppingCart />} label="Orders" />
+          <SidebarItem
+          icon={<ShoppingCart />}
+          label="Orders"
+          active={active === "orders"}
+          onClick={() => setActive("orders")}
+          />
           <SidebarItem
             icon={<People />}
             label="Users"
             active={active === "users"}
             onClick={() => setActive("users")}
           />
+         <SidebarItem 
+          icon={<Mail />} 
+          label="Contacts" 
+          active={active === "contacts"} 
+          onClick={() => setActive("contacts")} 
+          />
+
+
 
         </List>
 
@@ -135,7 +151,7 @@ useEffect(() => {
       {/* MAIN */}
       <Box sx={{ flexGrow: 1, p: 3 }}>
         {active === "users" && <Customers />}
-
+        
         {active === "dashboard" && (
   <Box display="flex" gap={3}>
 
@@ -162,6 +178,9 @@ useEffect(() => {
 
 
         {active === "products" && <Products updateTotal={fetchTotalProducts} />}
+        {active === "orders" && <Orders />}
+        {active === "contacts" && <Contacts />}
+        
       </Box>
     </Box>
   );
@@ -401,6 +420,8 @@ function Products({ updateTotal }) {
     formData.append("images", img);
   });
 
+  formData.append("mainImageIndex", product.mainImageIndex);
+
   const url = editingId ? `${API_URL}/${editingId}` : API_URL;
   const method = editingId ? "PUT" : "POST";
 
@@ -462,11 +483,17 @@ function Products({ updateTotal }) {
     <>
       {/* HEADER */}
       <Box display="flex" justifyContent="space-between" mb={2}>
-        <Typography variant="h5">Products</Typography>
-        <Button variant="contained" onClick={() => setOpen(true)}>
-          Add Product
-        </Button>
-      </Box>
+  <Typography variant="h5">Products</Typography>
+  <Button
+    variant="contained"
+    onClick={() => {
+      setEditingId(null);   // 🔥 reset edit mode
+      setOpen(true);
+    }}  
+  >
+    Add Product
+  </Button>
+</Box>
 
       {/* FILTERS */}
       <Box display="flex" gap={2} mb={2}>
@@ -506,20 +533,29 @@ function Products({ updateTotal }) {
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Price</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell align="center">Main Image</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
+  <TableRow>
+    <TableCell>Name</TableCell>
+    <TableCell>Price</TableCell>
+    <TableCell>Main Category</TableCell>
+    <TableCell>Sub Category</TableCell>
+    <TableCell>Description</TableCell>
+    <TableCell>Ingredients</TableCell>
+    <TableCell>How To Use</TableCell>
+    <TableCell>Offer Status</TableCell>
+    <TableCell>Offer Dates</TableCell>
+    <TableCell align="center">Images</TableCell>
+
+    <TableCell align="center">Actions</TableCell>
+  </TableRow>
+</TableHead>
+
 
           <TableBody>
             {filteredProducts.map((p) => (
               <TableRow key={p._id}>
                 <TableCell>{p.name}</TableCell>
-                <TableCell>
+
+<TableCell>
   {p.offer?.isActive ? (
     <>
       <span style={{ textDecoration: "line-through", color: "gray" }}>
@@ -539,39 +575,80 @@ function Products({ updateTotal }) {
   )}
 </TableCell>
 
-                <TableCell>
-                  {p.mainCategory}
-                  <br />
-                  <small>{p.subCategory}</small>
-                </TableCell>
-                
-                {/* MAIN IMAGE PREVIEW */}
-                <TableCell align="center">
-                  <Avatar
-                    src={p.images?.length ? `${IMAGE_BASE}${p.images[0]}` : ""}
-                    variant="rounded"
-                    sx={{ width: 40, height: 40, mx: "auto" }}
-                  />
-                  <Typography variant="caption" display="block">
-                    Main Image
-                  </Typography>
-                </TableCell>
+<TableCell>{p.mainCategory}</TableCell>
 
-                <TableCell align="center">
-                  <IconButton onClick={() => openEdit(p)}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() =>
-                      fetch(`${API_URL}/${p._id}`, {
-                        method: "DELETE",
-                      }).then(fetchProducts)
-                    }
-                  >
-                    <Delete />
-                  </IconButton>
-                </TableCell>
+<TableCell>{p.subCategory}</TableCell>
+
+<TableCell>{p.description?.slice(0, 40)}...</TableCell>
+
+<TableCell>
+  {Array.isArray(p.ingredients)
+    ? p.ingredients.join(", ")
+    : p.ingredients}
+</TableCell>
+
+<TableCell>{p.howToUse?.slice(0, 40)}...</TableCell>
+
+<TableCell>
+  {p.offer?.isActive ? "Active" : "No Offer"}
+</TableCell>
+
+<TableCell>
+  {p.offer?.startDate
+    ? new Date(p.offer.startDate).toLocaleDateString()
+    : "-"}{" "}
+  -
+  {p.offer?.endDate
+    ? new Date(p.offer.endDate).toLocaleDateString()
+    : "-"}
+</TableCell>
+<TableCell align="center">
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+      justifyContent: "center",
+      flexWrap: "wrap",
+    }}
+  >
+    {p.images && p.images.length > 0 ? (
+      [...p.images]
+  .sort((a, b) => {
+    if (a === p.mainImage) return -1;
+    if (b === p.mainImage) return 1;
+    return 0;
+  })
+  .map((img, index) => (
+        <Avatar
+          key={index}
+          src={`${IMAGE_BASE}${img}`}
+          variant="rounded"
+          sx={{ width: 40, height: 40 }}
+        />
+      ))
+    ) : (
+      "No Image"
+    )}
+  </Box>
+</TableCell>
+
+
+<TableCell align="center">
+  <IconButton onClick={() => openEdit(p)}>
+    <Edit />
+  </IconButton>
+  <IconButton
+    color="error"
+    onClick={() =>
+      fetch(`${API_URL}/${p._id}`, {
+        method: "DELETE",
+      }).then(fetchProducts)
+    }
+  >
+    <Delete />
+  </IconButton>
+</TableCell>
+
               </TableRow>
             ))}
           </TableBody>
@@ -748,23 +825,60 @@ function Products({ updateTotal }) {
 
           {/* MULTIPLE IMAGE INPUT */}
           <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={(e) =>
-              setProduct({
-                ...product,
-                imageFiles: Array.from(e.target.files),
-                mainImageIndex: 0, // first uploaded is main
-              })
-            }
-            style={{ marginTop: "10px" }}
-          />
+  type="file"
+  multiple
+  accept="image/*"
+  onChange={(e) => {
+    const files = Array.from(e.target.files);
+    setProduct({
+      ...product,
+      imageFiles: files,
+      mainImageIndex: 0,
+    });
+  }}
+  style={{ marginTop: "10px" }}
+/>
+
           {product.imageFiles.length > 0 && (
-            <Typography variant="caption" display="block">
-              First image will be main
-            </Typography>
-          )}
+  <Box
+    sx={{
+      display: "flex",
+      gap: 2,
+      mt: 2,
+      flexWrap: "wrap",
+    }}
+  >
+    {product.imageFiles.map((img, index) => (
+      <Box
+        key={index}
+        onClick={() =>
+          setProduct({
+            ...product,
+            mainImageIndex: index,
+          })
+        }
+        sx={{
+          border:
+            index === product.mainImageIndex
+              ? "3px solid green"
+              : "1px solid #ccc",
+          borderRadius: 2,
+          cursor: "pointer",
+          padding: "3px",
+        }}
+      >
+        <img
+          src={URL.createObjectURL(img)}
+          alt=""
+          width="80"
+          height="80"
+          style={{ objectFit: "cover" }}
+        />
+      </Box>
+    ))}
+  </Box>
+)}
+
         </DialogContent>
 
         <DialogActions>
@@ -777,3 +891,210 @@ function Products({ updateTotal }) {
     </>
   );
 }
+/*---------Contacts function------------*/
+
+function Contacts() {
+  const [contacts, setContacts] = useState([]);
+  const [replyOpen, setReplyOpen] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState("");
+  const [replyMessage, setReplyMessage] = useState("");
+  const [selectedContactId, setSelectedContactId] = useState("");
+
+  const fetchContacts = async () => {
+    const token = localStorage.getItem("token");
+    const res = await fetch("http://localhost:8000/api/contact/admin/contacts", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const data = await res.json();
+    setContacts(data.data);
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const sendReply = async () => {
+  await fetch("http://localhost:8000/api/contact/admin/reply", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ contactId: selectedContactId, replyMessage }),
+  });
+
+  alert("Reply sent successfully!");
+  setReplyOpen(false);
+  setReplyMessage("");
+};
+
+
+  return (
+    <>
+      <Typography variant="h5" mb={2}>Contact Messages</Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Phone</TableCell>
+              <TableCell>Message</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Reply</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {contacts.map((c) => (
+              <TableRow key={c._id}>
+                <TableCell>{c.name}</TableCell>
+                <TableCell>{c.email}</TableCell>
+                <TableCell>{c.phone}</TableCell>
+                <TableCell>{c.message}</TableCell>
+                <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>
+                  <Button
+  variant="contained"
+  onClick={() => {
+    setSelectedEmail(c.email);       // keep for display
+    setReplyOpen(true);
+    setSelectedContactId(c._id);     // store contact ID
+  }}
+>
+  Reply
+</Button>
+
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Reply Dialog */}
+      <Dialog open={replyOpen} onClose={() => setReplyOpen(false)} fullWidth>
+        <DialogTitle>Send Reply</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Reply Message"
+            value={replyMessage}
+            onChange={(e) => setReplyMessage(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReplyOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={sendReply}>Send</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
+function Orders() {
+  const [orders, setOrders] = useState([]);
+
+  const fetchOrders = async () => {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:8000/api/admin/orders", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+    setOrders(data.data);
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  return (
+    <>
+      <Typography variant="h5" mb={2}>
+        Orders
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>User ID</TableCell>
+              <TableCell>Items</TableCell>
+              <TableCell>Amount</TableCell>
+              <TableCell>Payment Status</TableCell>
+              <TableCell>Shipping City</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell>Delivery Status</TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {orders.map((o) => (
+              <TableRow key={o._id}>
+                <TableCell>{o.userId}</TableCell>
+
+                <TableCell>
+                  {o.items.map((item, index) => (
+                    <div key={index}>
+                      {item.name} × {item.quantity}
+                    </div>
+                  ))}
+                </TableCell>
+
+                <TableCell>₹{o.amount}</TableCell>
+
+                <TableCell>
+                  {o.paymentStatus === "paid" ? "Paid" : "Pending"}
+                </TableCell>
+
+                <TableCell>{o.shipping?.city}</TableCell>
+
+                <TableCell>
+                  {new Date(o.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+  <Select
+    value={o.deliveryStatus}
+    size="small"
+    onChange={async (e) => {
+      const token = localStorage.getItem("token");
+
+      await fetch(
+        `http://localhost:8000/api/admin/orders/${o._id}/delivery-status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            deliveryStatus: e.target.value,
+          }),
+        }
+      );
+
+      fetchOrders(); // refresh table
+    }}
+  >
+    <MenuItem value="Processing">Processing</MenuItem>
+    <MenuItem value="Shipped">Shipped</MenuItem>
+    <MenuItem value="Out for Delivery">Out for Delivery</MenuItem>
+    <MenuItem value="Delivered">Delivered</MenuItem>
+    <MenuItem value="Cancelled">Cancelled</MenuItem>
+  </Select>
+</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
+  );
+}
+
+

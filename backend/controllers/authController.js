@@ -122,9 +122,12 @@ exports.login = async (req, res) => {
     return res.status(400).json({ message: "Invalid credentials" });
 
   res.json({
-    token: generateToken(user),
-    role: user.role
-  });
+  token: generateToken(user),
+  role: user.role,
+  userId: user._id,        // MongoDB ObjectId
+  numericUserId: user.userId, // Your auto increment id (optional)
+});
+
 };
 
 

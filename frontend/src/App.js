@@ -17,7 +17,7 @@ import ProductDetail from "./pages/products/productdetails";
 import { CartProvider } from "./context/CartContext";
 import Cart from "./pages/cart";
 import ProfilePage from "./pages/profilepage";
-import Payment from "./pages/payment";
+import Checkout from "./pages/checkout";
 import Faq from "./pages/faq";
 import AboutUs from "./pages/aboutus";
 import ContectUs from "./pages/contactus";
@@ -53,7 +53,6 @@ function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/payment" element={<Payment />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/contactus" element={<ContactUs />} />
@@ -61,7 +60,8 @@ function App() {
           <Route path="/termsconditions" element={<TermsConditions />} />
           <Route path="/admin/customers" element={<Customers />} />
           <Route path="/ProtectedRoute" element={<ProtectedRoute />} />
-          
+          <Route path="/checkout" element={<Checkout />} />
+
 
         </Route>
         <Route path="/admin/dashbord" element={<AdminDashbord/>}/>

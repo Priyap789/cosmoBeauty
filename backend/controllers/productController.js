@@ -1,11 +1,13 @@
 const Product = require("../models/products");
-
+const Review = require("../models/Review");
 /* ================= ADD PRODUCT ================= */
 const addProduct = async (req, res) => {
   try {
     const imagePaths = req.files
       ? req.files.map((file) => `/uploads/${file.filename}`)
       : [];
+    const mainImageIndex = Number(req.body.mainImageIndex) || 0;
+  
 
     // Ingredients: comma-separated string to array
     const ingredientsArray = req.body.ingredients
@@ -31,6 +33,8 @@ const addProduct = async (req, res) => {
       subCategory: req.body.subCategory,
       description: req.body.description,
       images: imagePaths,
+      mainImage: imagePaths[mainImageIndex] || imagePaths[0],
+
       ingredients: ingredientsArray,
       howToUse: req.body.howToUse || "",
 
@@ -93,10 +97,19 @@ const getProductById = async (req, res) => {
     const product = await Product.findById(req.params.id);
 
     if (!product) {
-      return res.status(404).json(null);
+      return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(product);
+    // 🔥 Fetch reviews for this product
+    const reviews = await Review.find({ product: product._id })
+      .populate("user", "name") // include user's name
+      .sort({ createdAt: -1 });
+
+    // Send product + reviews together
+    res.json({
+      ...product.toObject(),
+      reviews,
+    });
   } catch (error) {
     res.status(400).json({ message: "Invalid product ID" });
   }
@@ -119,10 +132,17 @@ const updateProduct = async (req, res) => {
 
     // Update images if new ones uploaded
     if (req.files && req.files.length > 0) {
-      updatedData.images = req.files.map(
-        (file) => `/uploads/${file.filename}`
-      );
-    }
+  const imagePaths = req.files.map(
+    (file) => `/uploads/${file.filename}`
+  );
+
+  const mainImageIndex = Number(req.body.mainImageIndex) || 0;
+
+  updatedData.images = imagePaths;
+  updatedData.mainImage =
+    imagePaths[mainImageIndex] || imagePaths[0];
+}
+
 
     // 🔥 Offer update logic
     const discountPercentage = Number(req.body.discountPercentage) || 0;

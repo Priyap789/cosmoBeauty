@@ -1,8 +1,9 @@
 import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { addToCart } from "../redux/cartSlice";
+import { fetchCart } from "../redux/cartSlice";
 import StarDisplay from "./StarDisplay";
+import axios from "axios";
 
 const IMAGE_BASE = "http://localhost:8000";
 
@@ -39,18 +40,32 @@ const discountedPrice = isOfferActive
 
 
   /* ================= ADD TO CART ================= */
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+const handleAddToCart = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    dispatch(
-      addToCart({
-        ...product,
-        price: discountedPrice, // 🔥 add discounted price to cart
-        quantity: 1,
-      })
-    );
-  };
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:8000/api/cart/add", {
+      userId,
+      productId: product._id,
+      quantity: 1,
+      price: discountedPrice,
+    });
+
+    dispatch(fetchCart(userId));
+    alert("Added to cart!");
+  } catch (error) {
+    alert("Failed to add to cart");
+  }
+};
+
 
   return (
     <Link to={`/products/${product._id}`} className="block">

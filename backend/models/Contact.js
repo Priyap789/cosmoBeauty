@@ -20,6 +20,16 @@ const contactSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    // ✅ NEW FIELDS
+    status: {
+      type: String,
+      enum: ["Pending", "Replied"],
+      default: "Pending",
+    },
+    replyMessage: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

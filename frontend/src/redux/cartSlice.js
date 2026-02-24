@@ -1,45 +1,43 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
-const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
+/* ================= FETCH CART ================= */
+export const fetchCart = createAsyncThunk(
+  "cart/fetchCart",
+  async (userId) => {
+    const res = await axios.get(
+      `http://localhost:8000/api/cart/${userId}`
+    );
+    return res.data.items || [];
+  }
+);
 
+/* ================= SLICE ================= */
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
-    items: savedCart,
+    items: [],
+    loading: false,
   },
   reducers: {
-    addToCart: (state, action) => {
-      const product = action.payload;
-      const existing = state.items.find(p => p.id === product.id);
-
-      if (existing) {
-        existing.quantity += product.quantity;
-      } else {
-        state.items.push({ ...product, quantity: product.quantity, });
-      }
-
-      localStorage.setItem("cartItems", JSON.stringify(state.items));
+    clearCart: (state) => {
+      state.items = [];
     },
-
-    removeFromCart: (state, action) => {
-      state.items = state.items.filter(item => item.id !== action.payload);
-      localStorage.setItem("cartItems", JSON.stringify(state.items));
-    },
-
-    increaseQty: (state, action) => {
-      const item = state.items.find(i => i.id === action.payload);
-      if (item) item.quantity += 1;
-      localStorage.setItem("cartItems", JSON.stringify(state.items));
-    },
-
-    decreaseQty: (state, action) => {
-      const item = state.items.find(i => i.id === action.payload);
-      if (item && item.quantity > 1) item.quantity -= 1;
-      localStorage.setItem("cartItems", JSON.stringify(state.items));
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchCart.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(fetchCart.rejected, (state) => {
+        state.loading = false;
+      });
   },
 });
 
-export const { addToCart, removeFromCart, increaseQty, decreaseQty } = cartSlice.actions;
-
+export const { clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

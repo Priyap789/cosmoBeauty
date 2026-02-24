@@ -26,7 +26,7 @@ function Navbar() {
         onClick={() => navigate("/")}
       >
         <img
-          src="image/cosmo_logo.png"
+          src="/image/cosmo_logo.png"
           alt="COSMO Logo"
           className="h-10 w-auto object-contain"
         />

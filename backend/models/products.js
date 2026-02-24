@@ -28,9 +28,15 @@ const productSchema = new mongoose.Schema(
     mainCategory: String,
     subCategory: String,
     description: String,
-    images: [String],       // multiple images
+        images: [String],       // multiple images
+
+    mainImage: {
+      type: String,         // 🔥 MAIN IMAGE
+    },
+
     ingredients: [String],  // list of ingredients
     howToUse: String,       // instructions
+
 
     // ⭐ Ratings
     rating: {
