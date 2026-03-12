@@ -1,24 +1,21 @@
 const express = require("express");
+const router = express.Router();
+
 const {
-  signup,
+  sendOtp,       // ✅ must import
+  verifyOtp,     // ✅ must import
   login,
   forgotPassword,
-  resetPassword,
-  verifyEmailOtp
+  resetPassword
 } = require("../controllers/authController");
 
 const { protect, adminOnly } = require("../middleware/authMiddleware");
 
-const router = express.Router();
-
-// ✅ Auth routes
-router.post("/signup", signup);
+// Auth Routes
+router.post("/send-otp", sendOtp);       // sends OTP to email
+router.post("/verify-otp", verifyOtp);   // verifies OTP & creates user
 router.post("/login", login);
-router.post("/verify-email", verifyEmailOtp);
-
 router.post("/forgot-password", forgotPassword);
-
-// 🔹 UPDATED: remove :token since OTP is used
 router.post("/reset-password", resetPassword);
 
 // Protected Routes

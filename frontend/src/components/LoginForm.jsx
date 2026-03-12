@@ -1,15 +1,18 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Input from "./input";
 import Button from "./Button";
 import ForgotPassword from "./ForgotPassword";
 import ResetPassword from "./ResetPassword";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import Swal from "sweetalert2";
 
-function LoginForm({ onClose, switchToSignup }) {
+function LoginForm({ onClose, switchToSignup, onLoginSuccess }) {
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -17,63 +20,80 @@ function LoginForm({ onClose, switchToSignup }) {
   const [showForgot, setShowForgot] = useState(false);
   const [showReset, setShowReset] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ LOGIN SUBMIT
+  // =====================
+  // LOGIN SUBMIT
+  // =====================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData)
-        }
-      );
+      const response = await fetch("http://localhost:8000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Login failed");
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.message || "Invalid credentials",
+        });
         return;
       }
 
+      // Save token and userId
       localStorage.setItem("token", data.token);
       localStorage.setItem("userId", data.userId);
 
+      // Notify Navbar to switch button
+      if (onLoginSuccess) onLoginSuccess();
 
-      setPopup(true);
-
-      setTimeout(() => {
-        onClose();
-        window.location.href =
-          data.role === "admin" ? "/admin/dashboard" : "/";
-      }, 1500);
+      // Show success popup
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: "You have logged in successfully!",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        onClose(); // Close login popup
+        navigate(data.role === "admin" ? "/admin/dashbord" : "/");
+      });
 
     } catch (err) {
-      setError("Server error");
+      console.error("Server Error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Unable to login. Please try again later.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ WHEN OTP SENT → OPEN RESET POPUP
+  // =====================
+  // WHEN OTP SENT → OPEN RESET POPUP
+  // =====================
   const handleOtpSent = (email) => {
     setResetEmail(email);
     setShowForgot(false);
     setShowReset(true);
   };
 
-  // ✅ SHOW RESET PASSWORD POPUP
+  // =====================
+  // SHOW RESET PASSWORD POPUP
+  // =====================
   if (showReset) {
     return (
       <ResetPassword
@@ -86,7 +106,9 @@ function LoginForm({ onClose, switchToSignup }) {
     );
   }
 
-  // ✅ SHOW FORGOT PASSWORD POPUP
+  // =====================
+  // SHOW FORGOT PASSWORD POPUP
+  // =====================
   if (showForgot) {
     return (
       <ForgotPassword
@@ -98,7 +120,6 @@ function LoginForm({ onClose, switchToSignup }) {
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg relative">
-
       {!popup && (
         <button
           onClick={onClose}
@@ -123,40 +144,33 @@ function LoginForm({ onClose, switchToSignup }) {
           required
         />
 
-       <div className="relative">
-  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
 
-  <input
-    type={showPassword ? "text" : "password"}
-    name="password"
-    placeholder="Enter your password"
-    value={formData.password}
-    onChange={handleChange}
-    required
-    className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-  />
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+          />
 
-  <button
-    type="button"
-    onClick={() => setShowPassword(!showPassword)}
-    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-600"
-  >
-    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-  </button>
-</div>
-
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-600"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
         <Button
           text={loading ? "Signing In..." : "Sign In"}
           type="submit"
         />
       </form>
-
-      {error && (
-        <p className="text-red-600 text-center mt-3 text-sm">
-          {error}
-        </p>
-      )}
 
       <p
         onClick={() => setShowForgot(true)}

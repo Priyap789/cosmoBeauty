@@ -16,7 +16,7 @@
 //   console.log(`Backend is running on port: ${port}`);
 // });
 
-
+require("./utils/refundCron");
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");

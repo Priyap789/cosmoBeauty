@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 function ResetPassword({ email, onBack }) {
   const [otp, setOtp] = useState("");
@@ -6,6 +7,9 @@ function ResetPassword({ email, onBack }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,7 +36,7 @@ function ResetPassword({ email, onBack }) {
         setMessage("Password reset successful ✅");
 
         setTimeout(() => {
-          onBack(); // 👈 return to login popup
+          onBack();
         }, 2000);
       }
 
@@ -46,7 +50,7 @@ function ResetPassword({ email, onBack }) {
 
       <button
         onClick={onBack}
-        className="absolute top-3 right-3"
+        className="absolute top-3 right-3 text-gray-500 hover:text-pink-600"
       >
         ✕
       </button>
@@ -56,6 +60,7 @@ function ResetPassword({ email, onBack }) {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        
         <input
           type="text"
           placeholder="Enter OTP"
@@ -65,34 +70,58 @@ function ResetPassword({ email, onBack }) {
           required
         />
 
-        <input
-          type="password"
-          placeholder="New Password"
-          className="w-full border p-2 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        {/* NEW PASSWORD */}
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="New Password"
+            className="w-full border p-2 rounded pr-10"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2.5 text-gray-500 hover:text-pink-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          className="w-full border p-2 rounded"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
+        {/* CONFIRM PASSWORD */}
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            className="w-full border p-2 rounded pr-10"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-3 top-2.5 text-gray-500 hover:text-pink-600"
+          >
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-pink-600 text-white py-2 rounded"
+          className="w-full bg-pink-600 text-white py-2 rounded hover:bg-pink-700 transition"
         >
           Reset Password
         </button>
       </form>
 
-      {message && <p className="text-green-600 mt-3 text-center">{message}</p>}
-      {error && <p className="text-red-600 mt-3 text-center">{error}</p>}
+      {message && (
+        <p className="text-green-600 mt-3 text-center">{message}</p>
+      )}
+      {error && (
+        <p className="text-red-600 mt-3 text-center">{error}</p>
+      )}
     </div>
   );
 }

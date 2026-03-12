@@ -3,7 +3,9 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const generateToken = require("../utils/generateToken");
-
+// Temporary in-memory OTP store
+const otpStore = {}; 
+// Structure: otpStore[email] = { name, password, otp, expires }
 // ✅ Email Transport Setup
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -17,83 +19,71 @@ const transporter = nodemailer.createTransport({
 // =============================
 // USER SIGNUP (WITH OTP)
 // =============================
-exports.signup = async (req, res) => {
+// POST /send-otp
+exports.sendOtp = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    // Check if user already exists
     const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
+    if (userExists) return res.status(400).json({ message: "Email already exists" });
 
-    // 🔢 AUTO-INCREMENT USER ID
-    const lastUser = await User.findOne().sort({ userId: -1 });
-    const nextUserId = lastUser ? lastUser.userId + 1 : 1;
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 🔥 Generate 6-digit OTP
+    // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await User.create({
-      userId: nextUserId,
-      name,
-      email,
-      password: hashedPassword,
-      role: "user",
-      emailVerified: false,
-      emailOtp: otp,
-      emailOtpExpire: Date.now() + 5 * 60 * 1000 // 5 minutes
-    });
+    // Save OTP in temporary store (expires in 5 minutes)
+    otpStore[email] = { name, password, otp, expires: Date.now() + 5*60*1000 };
 
-    // 🔥 Send OTP Email
+    // Send OTP email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Email Verification OTP",
-      html: `
-        <h2>Your OTP is: ${otp}</h2>
-        <p>This OTP will expire in 5 minutes.</p>
-      `,
+      html: `<h2>Your OTP is: ${otp}</h2><p>This OTP will expire in 5 minutes.</p>`,
     });
 
-    res.status(201).json({
-      message: "OTP sent to your email",
-      email
-    });
+    res.status(200).json({ message: "OTP sent to your email" });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Signup failed" });
+    res.status(500).json({ message: "Failed to send OTP" });
   }
 };
-
 
 // =============================
 // VERIFY EMAIL OTP
 // =============================
-exports.verifyEmailOtp = async (req, res) => {
+// POST /verify-otp
+exports.verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
 
-    const user = await User.findOne({ email });
+    const record = otpStore[email];
+    if (!record) return res.status(400).json({ message: "OTP not found" });
+    if (record.otp !== otp) return res.status(400).json({ message: "Invalid OTP" });
+    if (record.expires < Date.now()) return res.status(400).json({ message: "OTP expired" });
 
-    if (!user)
-      return res.status(400).json({ message: "User not found" });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(record.password, 10);
 
-    if (user.emailOtp !== otp)
-      return res.status(400).json({ message: "Invalid OTP" });
+    // Auto-increment userId
+    const lastUser = await User.findOne().sort({ userId: -1 });
+    const nextUserId = lastUser ? lastUser.userId + 1 : 1;
 
-    if (user.emailOtpExpire < Date.now())
-      return res.status(400).json({ message: "OTP expired" });
+    // Create user after OTP verification
+    const newUser = await User.create({
+      userId: nextUserId,
+      name: record.name,
+      email,
+      password: hashedPassword,
+      role: "user",
+      emailVerified: true,
+    });
 
-    user.emailVerified = true;
-    user.emailOtp = undefined;
-    user.emailOtpExpire = undefined;
+    // Remove OTP from temporary store
+    delete otpStore[email];
 
-    await user.save();
-
-    res.json({ message: "Email verified successfully" });
+    res.status(201).json({ message: "User created successfully", userId: newUser._id });
 
   } catch (error) {
     console.error(error);

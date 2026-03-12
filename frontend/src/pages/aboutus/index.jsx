@@ -137,11 +137,8 @@ const AboutUs = () => {
             viewport={{ once: true }}
           >
             {[
-              { icon: <Package size={20} />, text: "Wide Selection" },
               { icon: <Truck size={20} />, text: "Fast Delivery" },
               { icon: <ShieldCheck size={20} />, text: "Secure Payment" },
-              { icon: <Users size={20} />, text: "Beauty Experts" },
-              { icon: <RotateCcw size={20} />, text: "Easy Returns" },
               { icon: <Headphones size={20} />, text: "24/7 Support" }
             ].map((item, i) => (
               <motion.div 

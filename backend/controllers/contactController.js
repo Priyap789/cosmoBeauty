@@ -2,14 +2,27 @@ const Contact = require("../models/Contact");
 const nodemailer = require("nodemailer");
 
 // ================= CREATE CONTACT =================
-exports.createContact = async (req, res) => {
+const createContact = async (req, res) => {
   try {
-    const { name, email, phone, message } = req.body;
+    let { name, email, phone, message } = req.body;
+
+    name = name?.trim();
+    email = email?.trim();
+    phone = phone?.trim();
+    message = message?.trim();
 
     if (!name || !email || !phone || !message) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
+      });
+    }
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: "Enter valid 10-digit Indian mobile number",
       });
     }
 
@@ -20,51 +33,87 @@ exports.createContact = async (req, res) => {
       message,
     });
 
+    // ================= SEND EMAIL TO ADMIN =================
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL,
+      subject: `New Contact Form Submission from ${name}`,
+      html: `
+        <h3>New Contact Form Submission</h3>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Message:</strong> ${message}</p>
+      `,
+    });
+
     res.status(201).json({
       success: true,
       message: "Contact request submitted successfully",
       data: contact,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Server error",
-      error: error.message,
+      message: error.message || "Server error",
     });
   }
 };
 
-// ================= GET ALL CONTACTS (ADMIN) =================
-exports.getAllContacts = async (req, res) => {
+// ================= GET ALL CONTACTS (Admin) =================
+const getAllContacts = async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
-
-    res.status(200).json({
+    res.json({
       success: true,
+      count: contacts.length,
       data: contacts,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error.message,
+    });
+  }
+};
+
+// ================= DELETE CONTACT =================
+const deleteContact = async (req, res) => {
+  try {
+    const contact = await Contact.findById(req.params.contactId);
+    if (!contact) {
+      return res.status(404).json({
+        success: false,
+        message: "Contact not found",
+      });
+    }
+    await contact.deleteOne();
+    res.json({
+      success: true,
+      message: "Contact deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
 
 // ================= REPLY TO CONTACT =================
-exports.replyToContact = async (req, res) => {
+const replyToContact = async (req, res) => {
   try {
     const { contactId, replyMessage } = req.body;
-
-    if (!contactId || !replyMessage) {
-      return res.status(400).json({
-        success: false,
-        message: "Contact ID and reply message required",
-      });
-    }
-
     const contact = await Contact.findById(contactId);
-
     if (!contact) {
       return res.status(404).json({
         success: false,
@@ -72,42 +121,40 @@ exports.replyToContact = async (req, res) => {
       });
     }
 
-    // ===== Nodemailer setup =====
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER, // from .env
-        pass: process.env.EMAIL_PASS, // App Password from Gmail
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    // ===== Send email =====
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: contact.email,                // user email
-      subject: "Reply from COSMO Support Team",
-      text: replyMessage,
-      replyTo: process.env.EMAIL_USER,  // admin can receive replies
+      to: contact.email,
+      subject: "Reply to your contact request",
+      html: `<h3>Hello ${contact.name},</h3><p>${replyMessage}</p><br/><p>Thank you.</p>`,
     });
 
-    // ===== Update contact status =====
     contact.status = "Replied";
     contact.replyMessage = replyMessage;
     await contact.save();
 
-    res.status(200).json({
+    res.json({
       success: true,
       message: "Reply sent successfully",
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Email sending failed",
-      error: error.message,
+      message: error.message,
     });
   }
 };
 
-
-
+module.exports = {
+  createContact,
+  getAllContacts,
+  deleteContact,
+  replyToContact,
+};

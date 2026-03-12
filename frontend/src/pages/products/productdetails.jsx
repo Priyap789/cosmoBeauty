@@ -6,6 +6,7 @@ import { ChevronLeft, ShoppingBag, Zap, ShieldCheck, Truck } from "lucide-react"
 import toast from "react-hot-toast";
 import StarDisplay from "../../components/StarDisplay";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const API_URL = "http://localhost:8000/api/products";
 
@@ -60,54 +61,67 @@ useEffect(() => {
 
   const discountedPrice = isOfferActive ? product?.offer?.offerPrice : product?.price;
 
-  const handleAddToCart = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) { toast.error("Please login first"); return; }
-    try {
-      await axios.post("http://localhost:8000/api/cart/add", {
-        userId, productId: product._id, quantity, price: discountedPrice,
-      });
-      dispatch(fetchCart(userId));
-      toast.success("Added to cart!");
-    } catch (error) { toast.error("Failed to add to cart"); }
-  };
+ const handleAddToCart = async () => {
+  const userId = localStorage.getItem("userId");
 
-  const handleBuyNow = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) { toast.error("Please login first"); return; }
-    try {
-      const res = await axios.post("http://localhost:8000/api/payment/create", {
-        userId, productId: product._id, quantity, price: discountedPrice,
-      });
-      const { key, amount, razorpayOrderId } = res.data;
-      const options = {
-        key, amount, currency: "INR", name: product.name, description: "Buy Now Payment",
-        order_id: razorpayOrderId,
-        handler: async function (response) {
-          await axios.post("http://localhost:8000/api/payment/verify", {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          });
-          toast.success("Payment successful!");
-        },
-        prefill: { email: localStorage.getItem("email") || "", contact: localStorage.getItem("phone") || "" },
-        theme: { color: "#db2777" },
-      };
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (err) { toast.error("Payment failed"); }
-  };
+  if (!userId) {
+    Swal.fire({
+      icon: "warning",
+      title: "Login Required",
+      text: "Please login first to add items to cart",
+      confirmButtonColor: "#ec4899",
+    });
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:8000/api/cart/add", {
+      userId,
+      productId: product._id,
+      quantity,
+      price: discountedPrice,
+    });
+
+    dispatch(fetchCart(userId));
+
+    Swal.fire({
+      icon: "success",
+      title: "Added to Cart!",
+      text: `${product.name} added successfully.`,
+      confirmButtonColor: "#ec4899",
+    });
+
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Failed to add to cart",
+      confirmButtonColor: "#ec4899",
+    });
+  }
+};
+
+ 
   const handleSubmitReview = async () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    toast.error("Please login to review");
+    Swal.fire({
+  icon: "warning",
+  title: "Login Required",
+  text: "Please login to submit a review",
+  confirmButtonColor: "#ec4899",
+});
     return;
   }
 
   if (!rating) {
-    toast.error("Please select rating");
+    Swal.fire({
+  icon: "info",
+  title: "Select Rating",
+  text: "Please choose a rating before submitting",
+  confirmButtonColor: "#ec4899",
+});
     return;
   }
 
@@ -118,7 +132,12 @@ useEffect(() => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    toast.success("Review submitted!");
+    Swal.fire({
+  icon: "success",
+  title: "Thank You!",
+  text: "Your review has been submitted successfully.",
+  confirmButtonColor: "#ec4899",
+});
     setRating(0);
     setComment("");
 
@@ -128,7 +147,12 @@ useEffect(() => {
     setProduct(data);
     setReviews(data.reviews || []); // 🔥 update reviews state
   } catch (err) {
-    toast.error(err.response?.data?.message || "Review failed");
+    Swal.fire({
+  icon: "error",
+  title: "Review Failed",
+  text: err.response?.data?.message || "Something went wrong",
+  confirmButtonColor: "#ec4899",
+});
   }
 };
 
@@ -142,6 +166,41 @@ useEffect(() => {
   if (!product) return <p className="text-center py-10 text-gray-500">Product not found</p>;
 
   const images = product.images || [];
+  const handleBuyNow = async () => {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    Swal.fire({
+      icon: "warning",
+      title: "Login Required",
+      text: "Please login first to continue",
+      confirmButtonColor: "#ec4899",
+    });
+    return;
+  }
+
+  const result = await Swal.fire({
+    title: "Proceed to Checkout?",
+    text: "You will be redirected to checkout page.",
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonColor: "#ec4899",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, Continue",
+  });
+
+  if (!result.isConfirmed) return;
+
+  const buyNowItem = {
+    productId: product._id,
+    name: product.name,
+    price: discountedPrice,
+    quantity: quantity,
+    image: mainImage,
+  };
+
+  navigate("/checkout", { state: { buyNowItem } });
+};
 
   return (
     <div className="bg-gray-50 min-h-screen pb-20">
@@ -153,10 +212,10 @@ useEffect(() => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-500 hover:text-pink-600 transition-all group"
           >
-            <div className="p-2 bg-white rounded-full shadow-sm group-hover:shadow-md transition-shadow">
+            <div className="">
               <ChevronLeft size={18} />
             </div>
-            <span className="text-sm font-semibold tracking-wide uppercase">Back to Collection</span>
+            <span className="hidden md:flex items-center gap-2 text-pink-600 hover:text-pink-700 font-medium transition-colors">Back to Shop</span>
           </button>
         </nav>
 
@@ -244,20 +303,21 @@ useEffect(() => {
               </div>
 
               {/* ACTION BUTTONS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <button 
-                  onClick={handleAddToCart}
-                  className="flex items-center justify-center gap-2 bg-white border-2 border-pink-600 text-pink-600 px-6 py-4 rounded-xl font-bold hover:bg-pink-50 transition-all active:scale-95"
-                >
-                  <ShoppingBag size={20} /> Add to Cart
-                </button>
-                <button 
-                  onClick={handleBuyNow}
-                  className="flex items-center justify-center gap-2 bg-pink-600 text-white px-6 py-4 rounded-xl font-bold hover:bg-pink-700 shadow-lg shadow-pink-200 transition-all active:scale-95"
-                >
-                  <Zap size={20} fill="currentColor" /> Buy Now
-                </button>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+  <button 
+    onClick={handleAddToCart}
+    className="flex items-center justify-center gap-3 bg-white border-2 border-pink-600 text-pink-600 px-2 py-2 rounded-2xl text-lg font-extrabold hover:bg-pink-50 transition-all active:scale-95"
+  >
+    <ShoppingBag size={24} /> Add to Cart
+  </button>
+<button 
+  onClick={handleBuyNow}
+  className="flex items-center justify-center gap-3 bg-pink-600 text-white px-2 py-2 rounded-2xl text-lg font-extrabold hover:bg-pink-700 transition-all active:scale-95"
+>
+  <Zap size={24} /> Buy Now
+</button>
               </div>
+              
             </div>
 
             {/* TRUST BADGES */}

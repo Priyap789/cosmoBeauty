@@ -60,7 +60,19 @@ router.post("/:productId", protect, async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
+// GET all reviews
+router.get("/", async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("user", "name")
+      .populate("product", "name")
+      .sort({ createdAt: -1 });
 
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 // GET reviews for a product
 router.get("/:productId", async (req, res) => {
   try {

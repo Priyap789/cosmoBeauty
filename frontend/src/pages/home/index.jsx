@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // Added for animations
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "../../components/Navbar";
 import Hero from "../../components/Hero";
 import LoginForm from "../../components/LoginForm";
@@ -9,25 +9,26 @@ import Footer from "../../components/Footer";
 import SliderSection from "../../components/SliderSection";
 
 function Home() {
-  const [popupType, setPopupType] = useState(null); // "login" | "signup" | null
+  const [popupType, setPopupType] = useState(null);
 
-  // ✅ AUTO OPEN LOGIN IF resetToken EXISTS
+  // Auto open login popup if resetToken exists in URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("resetToken");
 
     if (token) {
-      setTimeout(() => {
-        setPopupType("login");
-      }, 100);
+      setTimeout(() => setPopupType("login"), 100);
     }
   }, []);
 
   return (
     <>
+      <Navbar />
+
       <SliderSection />
       <Hero />
       <Features />
+      
 
       {/* ANIMATED LOGIN / SIGNUP POPUP */}
       <AnimatePresence>
@@ -50,7 +51,6 @@ function Home() {
                   switchToSignup={() => setPopupType("signup")}
                 />
               )}
-
               {popupType === "signup" && (
                 <SignupForm
                   onClose={() => setPopupType(null)}
@@ -61,7 +61,6 @@ function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-      
     </>
   );
 }

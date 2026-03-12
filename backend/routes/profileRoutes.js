@@ -47,22 +47,47 @@ router.put("/me", protect, async (req, res) => {
 });
 
 /* =================================
-   GET USER ORDERS (WITH DELIVERY STATUS)
+   GET USER ORDERS WITH PRODUCT DETAILS
 ================================= */
 router.get("/my-orders", protect, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "items.productId",
+        model: "Product",
+        select: "name images",
+      });
+
+  const formattedOrders = orders.map((order) => ({
+  _id: order._id,
+  amount: order.amount,
+  createdAt: order.createdAt,
+  deliveryStatus: order.deliveryStatus,
+
+  // ⭐ ADD THESE
+  refundStatus: order.refundStatus,
+  refundDate: order.refundDate,
+  cancelReason: order.cancelReason,
+  adminMessage: order.adminMessage,
+
+  items: order.items.map((item) => ({
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    mainImage: item.productId?.images?.[0] || "",
+  })),
+}));
 
     res.json({
       success: true,
-      count: orders.length,
-      data: orders,
+      data: formattedOrders,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch user orders",
+      message: "Failed to fetch orders",
     });
   }
 });

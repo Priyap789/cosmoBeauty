@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { fetchCart } from "../redux/cartSlice";
 import StarDisplay from "./StarDisplay";
 import axios from "axios";
-
+import Swal from "sweetalert2";
 const IMAGE_BASE = "http://localhost:8000";
 
 function ProductCard({ product }) {
@@ -47,7 +47,12 @@ const handleAddToCart = async (e) => {
   const userId = localStorage.getItem("userId");
 
   if (!userId) {
-    alert("Please login first");
+    Swal.fire({
+      icon: "warning",
+      title: "Login Required",
+      text: "Please login first to add items to cart",
+      confirmButtonColor: "#ec4899",
+    });
     return;
   }
 
@@ -60,9 +65,22 @@ const handleAddToCart = async (e) => {
     });
 
     dispatch(fetchCart(userId));
-    alert("Added to cart!");
+
+    Swal.fire({
+      icon: "success",
+      title: "Added to Cart!",
+      text: `${product.name} has been added successfully.`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
   } catch (error) {
-    alert("Failed to add to cart");
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Failed to add product to cart. Please try again.",
+      confirmButtonColor: "#ec4899",
+    });
   }
 };
 

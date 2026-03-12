@@ -1,4 +1,3 @@
-// models/Order.js
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
@@ -16,9 +15,11 @@ const orderSchema = new mongoose.Schema(
           ref: "Product",
           required: true,
         },
+
         name: String,
         price: Number,
         quantity: Number,
+        mainImage: String
       },
     ],
 
@@ -34,6 +35,12 @@ const orderSchema = new mongoose.Schema(
     amount: {
       type: Number,
       required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["COD", "ONLINE"],
+      default: "COD",
     },
 
     paymentStatus: {
@@ -55,8 +62,39 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Processing",
     },
+
+    // ⭐ WHO CANCELLED THE ORDER
+    cancelledBy: {
+      type: String,
+      enum: ["user", "admin"],
+      default: null,
+    },
+
+    cancelReason: {
+      type: String,
+      default: "",
+    },
+
+    cancelledAt: {
+      type: Date,
+    },
+
+    adminMessage: {
+      type: String,
+      default: "",
+    },
+
+    refundStatus: {
+      type: String,
+      enum: ["none", "processing", "completed"],
+      default: "none",
+    },
+
+    refundDate: {
+      type: Date,
+    },
   },
-  { timestamps: true } // ✅ adds createdAt & updatedAt automatically
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Order", orderSchema);

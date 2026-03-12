@@ -63,7 +63,6 @@ function ProductsPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMobileFilterOpen(false)} />
           <div className="relative bg-white rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto animate-in slide-in-from-bottom duration-300">
             <div className="flex justify-between items-center mb-6">
-              {/* Renamed to Categories */}
               <h2 className="text-pink-600 font-black uppercase text-xs tracking-widest">Categories</h2>
               <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-purple-50 rounded-full">
                 <X size={20} className="text-black" />
@@ -82,11 +81,16 @@ function ProductsPage() {
 
       {/* 🟣 MAIN CONTENT */}
       <div className="max-w-[1440px] mx-auto px-4 pt-5 pb-12">
-        <div className="flex flex-col lg:flex-row gap-4 items-start">
+        {/* Added items-stretch to ensure column height is consistent */}
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch">
           
-          {/* 💻 DESKTOP SIDEBAR */}
+          {/* 💻 DESKTOP SIDEBAR - UPDATED FOR STICKY BEHAVIOR */}
           <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-0 pt-0"> 
+            <div className="sticky top-20 h-[calc(100vh-6rem)] overflow-y-auto no-scrollbar"> 
+              {/* top-20: Distance from top of screen 
+                  h-[calc(100vh-6rem)]: Limits height to screen size so it doesn't scroll off
+                  no-scrollbar: Keeps it clean (if your CSS supports it)
+              */}
               <CategoryFilter
                 selected={selectedFilters}
                 onChange={setSelectedFilters}
