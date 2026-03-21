@@ -2,7 +2,7 @@ import React from "react";
 
 const TermsConditions = () => {
   return (
-    <div className="bg-pink-50 min-h-screen py-16 px-4">
+    <div className="bg-gray-50 min-h-screen py-16 px-4">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-3xl font-bold text-pink-600 mb-6">Terms & Conditions</h1>
         <p className="mb-4"><strong>Effective Date:</strong> January 8, 2026</p>
@@ -34,10 +34,15 @@ const TermsConditions = () => {
           <li>Risk of loss or damage passes to the customer upon delivery.</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">5. Returns & Refunds</h2>
+        <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">5. No Return & No Refund Policy</h2>
         <p className="mb-4">
-          Returns and refunds are handled as per our Return Policy. Damaged or incorrect products must be reported within <strong>[X] days</strong> of delivery.
+          All sales are final. Cosmo Beauty does not accept returns or provide refunds once an order has been delivered.
         </p>
+        <ul className="list-disc list-inside mb-4">
+          <li>Please ensure you review product details carefully before placing an order.</li>
+          <li>In case of damaged or incorrect items, you must report the issue within 24 hours of delivery with proof.</li>
+          <li>We reserve the right to review and decide on such cases.</li>
+        </ul>
 
         <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">6. Intellectual Property</h2>
         <p className="mb-4">
@@ -51,7 +56,7 @@ const TermsConditions = () => {
 
         <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">8. Governing Law</h2>
         <p className="mb-4">
-          These terms are governed by the laws of <strong>[Your Country/State]</strong>. Any disputes will be subject to the jurisdiction of <strong>[Your Local Courts]</strong>.
+          These terms are governed by the laws of <strong>India</strong>. Any disputes will be subject to the jurisdiction of <strong>Gujarat Courts</strong>.
         </p>
 
         <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">9. Changes to Terms</h2>
@@ -61,9 +66,12 @@ const TermsConditions = () => {
 
         <h2 className="text-2xl font-semibold text-pink-600 mt-6 mb-3">10. Contact</h2>
         <p>
-          For questions regarding these Terms or Privacy Policy, contact us at: <br/>
-          <strong>Email:</strong> <a href="mailto:support@cosmobeauty.com" className="text-pink-600 underline">support@cosmobeauty.com</a> <br/>
-          <strong>Phone:</strong> [+91-XXXXXXXXXX]
+          For questions regarding these Terms, contact us at: <br/>
+          <strong>Email:</strong>{" "}
+          <a href="mailto:support@cosmobeauty.com" className="text-pink-600 underline">
+            support@cosmobeauty.com
+          </a> <br/>
+          <strong>Phone:</strong> +91-XXXXXXXXXX
         </p>
       </div>
     </div>

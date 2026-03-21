@@ -57,6 +57,16 @@ function Footer() {
           <h3 className="text-white font-semibold mb-3">Company</h3>
           <ul className="space-y-2 text-sm">
             <li>
+              <NavLink to="/" className={linkClass}>
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/products" className={linkClass}>
+                Product Page
+              </NavLink>
+            </li>
+            <li>
               <NavLink to="/aboutus" className={linkClass}>
                 About Us
               </NavLink>

@@ -29,58 +29,67 @@ function LoginForm({ onClose, switchToSignup, onLoginSuccess }) {
   // =====================
   // LOGIN SUBMIT
   // =====================
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch("http://localhost:8000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: data.message || "Invalid credentials",
-        });
-        return;
-      }
-
-      // Save token and userId
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.userId);
-
-      // Notify Navbar to switch button
-      if (onLoginSuccess) onLoginSuccess();
-
-      // Show success popup
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful",
-        text: "You have logged in successfully!",
-        timer: 1500,
-        showConfirmButton: false,
-      }).then(() => {
-        onClose(); // Close login popup
-        navigate(data.role === "admin" ? "/admin/dashbord" : "/");
-      });
-
-    } catch (err) {
-      console.error("Server Error:", err);
+    if (!response.ok) {
+      // ❌ Login Failed Alert
       Swal.fire({
         icon: "error",
-        title: "Server Error",
-        text: "Unable to login. Please try again later.",
+        title: "Login Failed",
+        text: data.message || "Invalid credentials",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    // ✅ Save token and user info
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("userId", data.userId);
+    localStorage.setItem("role", data.role);
+
+    // Notify Navbar to update button
+    if (onLoginSuccess) onLoginSuccess();
+
+    // 🎉 Success alert
+    Swal.fire({
+      icon: "success",
+      title: "Login Successful",
+      text: "You have logged in successfully!",
+      timer: 1500,
+      showConfirmButton: false,
+    }).then(() => {
+      onClose(); // Close login popup
+
+      // 🔄 Refresh the page OR redirect based on role
+      if (data.role === "admin") {
+        window.location.href = "/admin/dashbord"; // Admin dashboard
+      } else {
+        window.location.href = "/profile"; // User profile
+      }
+    });
+
+  } catch (err) {
+    // ⚠️ Server error alert
+    console.error("Server Error:", err);
+    Swal.fire({
+      icon: "error",
+      title: "Server Error",
+      text: "Unable to login. Please try again later.",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   // =====================
   // WHEN OTP SENT → OPEN RESET POPUP
@@ -92,7 +101,7 @@ function LoginForm({ onClose, switchToSignup, onLoginSuccess }) {
   };
 
   // =====================
-  // SHOW RESET PASSWORD POPUP
+  // SHOW RESET PASSWORD
   // =====================
   if (showReset) {
     return (
@@ -107,7 +116,7 @@ function LoginForm({ onClose, switchToSignup, onLoginSuccess }) {
   }
 
   // =====================
-  // SHOW FORGOT PASSWORD POPUP
+  // SHOW FORGOT PASSWORD
   // =====================
   if (showForgot) {
     return (
@@ -145,7 +154,10 @@ function LoginForm({ onClose, switchToSignup, onLoginSuccess }) {
         />
 
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Lock
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            size={18}
+          />
 
           <input
             type={showPassword ? "text" : "password"}

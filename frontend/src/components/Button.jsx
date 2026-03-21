@@ -5,8 +5,7 @@ function Button({ text, onClick, type = "button" }) {
     <button
       type={type}
       onClick={onClick}
-      className="bg-pink-500 text-white px-4 py-2 rounded-lg font-medium
-             hover:bg-pink-600 transition"
+      className="w-full bg-pink-500 text-white py-2 rounded-lg font-medium hover:bg-pink-600 transition"
     >
       {text}
     </button>
@@ -14,6 +13,3 @@ function Button({ text, onClick, type = "button" }) {
 }
 
 export default Button;
-
-
-

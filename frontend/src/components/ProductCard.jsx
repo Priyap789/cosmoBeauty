@@ -5,11 +5,12 @@ import { fetchCart } from "../redux/cartSlice";
 import StarDisplay from "./StarDisplay";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 const IMAGE_BASE = "http://localhost:8000";
 
 function ProductCard({ product }) {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
   /* ================= IMAGE ================= */
   const mainImage =
     product.images && product.images.length > 0
@@ -83,6 +84,34 @@ const handleAddToCart = async (e) => {
     });
   }
 };
+const handleBuyNow = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    Swal.fire({
+      icon: "warning",
+      title: "Login Required",
+      text: "Please login first to continue",
+      confirmButtonColor: "#ec4899",
+    });
+    return;
+  }
+
+  // 👉 Redirect to checkout with product data
+  navigate("/checkout", {
+    state: {
+      product: {
+        ...product,
+        price: discountedPrice,
+        quantity: 1,
+      },
+      isBuyNow: true,
+    },
+  });
+};
 
 
   return (
@@ -133,31 +162,42 @@ const handleAddToCart = async (e) => {
           />
 
           {/* PRICE + CART */}
-          <div className="flex items-center justify-between mt-4">
-            <div>
-              {isOfferActive ? (
-                <>
-                  <span className="text-sm text-gray-400 line-through mr-2">
-                    ₹{product.price}
-                  </span>
-                  <span className="font-bold text-red-600">
-                    ₹{discountedPrice}
-                  </span>
-                </>
-              ) : (
-                <span className="font-bold text-gray-800">
-                  ₹{product.price}
-                </span>
-              )}
-            </div>
+         <div className="flex items-center justify-between mt-4 gap-2">
+  <div>
+    {isOfferActive ? (
+      <>
+        <span className="text-sm text-gray-400 line-through mr-2">
+          ₹{product.price}
+        </span>
+        <span className="font-bold text-red-600">
+          ₹{discountedPrice}
+        </span>
+      </>
+    ) : (
+      <span className="font-bold text-gray-800">
+        ₹{product.price}
+      </span>
+    )}
+  </div>
 
-            <button
-              onClick={handleAddToCart}
-              className="bg-pink-500 p-2 rounded-lg text-white hover:bg-pink-600"
-            >
-              <ShoppingCart size={18} />
-            </button>
-          </div>
+  <div className="flex gap-2">
+    {/* Add to Cart */}
+    <button
+      onClick={handleAddToCart}
+      className="bg-pink-500 p-2 rounded-lg text-white hover:bg-pink-600"
+    >
+      <ShoppingCart size={18} />
+    </button>
+
+    {/* ✅ Buy Now */}
+    <button
+      onClick={handleBuyNow}
+      className="bg-pink-500 px-3 py-2 rounded-lg text-white text-sm hover:bg-pink-600"
+    >
+      Buy Now
+    </button>
+  </div>
+</div>
         </div>
       </div>
     </Link>

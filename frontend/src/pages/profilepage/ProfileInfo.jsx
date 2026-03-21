@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileInfo({ user, setUser }) {
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", mobile: "" });
   const [loading, setLoading] = useState(false);
   const userId = localStorage.getItem("userId");
-
+  const navigate = useNavigate();
   // Load user data into form when user prop changes
   useEffect(() => {
     if (user) {
@@ -25,7 +26,6 @@ export default function ProfileInfo({ user, setUser }) {
 
 
 const handleSave = async () => {
-  // Basic validation
   if (!form.firstName?.trim() || !form.lastName?.trim()) {
     alert("Please enter both first and last name.");
     return;
@@ -38,7 +38,7 @@ const handleSave = async () => {
   const updatedName = `${form.firstName.trim()} ${form.lastName.trim()}`;
 
   try {
-    setLoading(true); // start loading
+    setLoading(true);
 
     const res = await axios.put(`http://localhost:8000/api/profile/${userId}`, {
       name: updatedName,
@@ -46,19 +46,20 @@ const handleSave = async () => {
       mobile: form.mobile?.trim() || "",
     });
 
-    // Update UI with new data
     setUser(res.data);
     setEdit(false);
 
     alert("Profile updated successfully!");
+
+    // ✅ Redirect to home page
+    navigate("/");
+
   } catch (err) {
     console.error(err);
-
-    // Show backend error if available
     const message = err.response?.data?.message || "Failed to save changes.";
     alert(message);
   } finally {
-    setLoading(false); // stop loading
+    setLoading(false);
   }
 };
 

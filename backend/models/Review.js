@@ -19,6 +19,12 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
     comment: String,
+
+    // ✅ ADD THIS
+    image: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

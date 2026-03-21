@@ -5,48 +5,60 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 import { useSelector } from "react-redux";
 import Swal from "sweetalert2";
-
+import { useDispatch } from "react-redux";
+import { clearCart } from "../redux/cartSlice"; // make sure path is correct
 function Navbar() {
   const navigate = useNavigate();
+  const dispatch = useDispatch(); // ✅ add this
   const [popupType, setPopupType] = useState(null); // "login" | "signup" | null
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const cartItems = useSelector((state) => state.cart.items);
 
-  // Check login state on mount
+  // ✅ Check login state
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
+    const checkLogin = () => {
+      const token = localStorage.getItem("token");
+      setIsLoggedIn(!!token);
+    };
+
+    checkLogin();
+
+    // Sync login state across tabs
+    window.addEventListener("storage", checkLogin);
+    return () => window.removeEventListener("storage", checkLogin);
   }, []);
 
   // =====================
   // LOGOUT WITH SWEET ALERT
   // =====================
-  const handleLogout = () => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You will be logged out!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ec4899',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, logout!',
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("userId");
-        setIsLoggedIn(false);
-
-        Swal.fire({
-          icon: 'success',
-          title: 'Logged Out',
-          text: 'You have been successfully logged out.',
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
-    });
-  };
+const handleLogout = () => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You will be logged out!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ec4899",
+    cancelButtonColor: "#6b7280",
+    confirmButtonText: "Yes, logout!",
+    reverseButtons: true,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      setIsLoggedIn(false);
+      dispatch(clearCart());
+      Swal.fire({
+  icon: "success",
+  title: "Logged Out",
+  text: "You have been successfully logged out.",
+  timer: 1500,
+  showConfirmButton: false,
+}).then(() => {
+  navigate("/"); // <-- redirect to homepage
+});
+    }
+  });
+};
 
   const navClass = ({ isActive }) =>
     `hover:text-pink-600 ${
@@ -81,13 +93,22 @@ function Navbar() {
 
       {/* Icons */}
       <div className="flex items-center gap-4">
-        {/* User Icon */}
-        <div className="cursor-pointer" onClick={() => navigate("/profile")}>
-          <User />
-        </div>
+
+        {/* ✅ User Icon (ONLY if logged in) */}
+        {isLoggedIn && (
+          <div
+            className="cursor-pointer"
+            onClick={() => navigate("/profile")}
+          >
+            <User />
+          </div>
+        )}
 
         {/* Cart */}
-        <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
+        <div
+          className="relative cursor-pointer"
+          onClick={() => navigate("/cart")}
+        >
           <ShoppingCart />
           {cartItems.length > 0 && (
             <span className="absolute -top-2 -right-2 bg-pink-500 text-white text-xs px-2 rounded-full">
@@ -117,19 +138,25 @@ function Navbar() {
       {/* LOGIN / SIGNUP POPUP */}
       {popupType && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          
           {popupType === "login" && (
             <LoginForm
               onClose={() => setPopupType(null)}
               switchToSignup={() => setPopupType("signup")}
-              onLoginSuccess={() => setIsLoggedIn(true)} // update Navbar
+              onLoginSuccess={() => {
+                setIsLoggedIn(true);
+                setPopupType(null);
+              }}
             />
           )}
+
           {popupType === "signup" && (
             <SignupForm
               onClose={() => setPopupType(null)}
               switchToLogin={() => setPopupType("login")}
             />
           )}
+
         </div>
       )}
     </nav>

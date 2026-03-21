@@ -5,8 +5,29 @@ const Product = require("../models/products");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
 
-// Add a review
-router.post("/:productId", protect, async (req, res) => {
+const multer = require("multer");
+const path = require("path");
+
+/* ==============================
+   MULTER CONFIGURATION
+================================ */
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+/* ==============================
+   ADD REVIEW
+================================ */
+
+router.post("/:productId", protect, upload.single("image"), async (req, res) => {
   try {
     const { rating, comment } = req.body;
     const userId = req.user._id;
@@ -15,7 +36,7 @@ router.post("/:productId", protect, async (req, res) => {
       return res.status(400).json({ message: "Rating and userId are required" });
     }
 
-    // 🔥 Check if user purchased & order delivered
+    /* 🔥 Check if user purchased & order delivered */
     const order = await Order.findOne({
       userId: userId,
       deliveryStatus: "Delivered",
@@ -23,29 +44,37 @@ router.post("/:productId", protect, async (req, res) => {
     });
 
     if (!order) {
-      return res.status(400).json({ message: "You can review only delivered products" });
+      return res
+        .status(400)
+        .json({ message: "You can review only delivered products" });
     }
 
-    // 🔥 Check duplicate review
+    /* 🔥 Check duplicate review */
     const alreadyReviewed = await Review.findOne({
       user: userId,
       product: req.params.productId,
     });
 
     if (alreadyReviewed) {
-      return res.status(400).json({ message: "You have already reviewed this product" });
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this product" });
     }
 
-    // Create review
+    /* CREATE REVIEW */
+
     await Review.create({
       user: userId,
       product: req.params.productId,
       rating,
       comment,
+      image: req.file ? `/uploads/${req.file.filename}` : "",
     });
 
-    // Update product rating & numReviews
+    /* UPDATE PRODUCT RATING */
+
     const reviews = await Review.find({ product: req.params.productId });
+
     const avgRating =
       reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
@@ -54,13 +83,20 @@ router.post("/:productId", protect, async (req, res) => {
       numReviews: reviews.length,
     });
 
-    res.status(201).json({ message: "Review added successfully", reviews });
+    res.status(201).json({
+      message: "Review added successfully",
+      reviews,
+    });
   } catch (err) {
     console.error(err);
     res.status(400).json({ message: err.message });
   }
 });
-// GET all reviews
+
+/* ==============================
+   GET ALL REVIEWS
+================================ */
+
 router.get("/", async (req, res) => {
   try {
     const reviews = await Review.find()
@@ -73,7 +109,11 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// GET reviews for a product
+
+/* ==============================
+   GET REVIEWS BY PRODUCT
+================================ */
+
 router.get("/:productId", async (req, res) => {
   try {
     const reviews = await Review.find({ product: req.params.productId })

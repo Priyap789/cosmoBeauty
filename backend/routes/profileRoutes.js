@@ -36,12 +36,27 @@ router.put("/me", protect, async (req, res) => {
 
     user.name = req.body.name || user.name;
     user.mobile = req.body.mobile || user.mobile;
-    user.addresses = req.body.addresses || user.addresses;
+
+    const { addresses } = req.body;
+
+    if (addresses && addresses.length > 0) {
+      user.addresses = addresses.map((addr) => ({
+        fullName: addr.fullName || "",
+        mobile: addr.mobile || "",
+        address: addr.address || "",
+        city: addr.city || "",
+        state: addr.state || "",
+        district: addr.district || "",   // ✅ ADD THIS
+        country: addr.country || "",     // ✅ ADD THIS
+        pincode: addr.pincode || "",
+      }));
+    }
 
     await user.save();
 
     res.json(user);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Failed to update profile" });
   }
 });

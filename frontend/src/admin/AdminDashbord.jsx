@@ -28,6 +28,7 @@ import {
   Chip,
   Tooltip,
   Fade,
+  
 
   
 } from "@mui/material";
@@ -156,7 +157,7 @@ const fetchTotalReviews = async () => {
 const handleLogout = () => {
   localStorage.removeItem("token"); // remove admin token
   localStorage.removeItem("user");  // optional if stored
-  window.location.href = "/home"; // redirect to login page
+  window.location.href = "/"; // redirect to login page
 };
 
 useEffect(() => {
@@ -1424,11 +1425,12 @@ function Reviews() {
   const [allReviews, setAllReviews] = useState([]);
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState("");
+  const [openImage, setOpenImage] = useState(false);
+const [selectedImage, setSelectedImage] = useState("");
 
-  // Replace this with your actual API URL for products
   const API_URL = "http://localhost:8000/api/products";
 
-  // Fetch all products
+  // Fetch products
   const fetchProducts = async () => {
     try {
       const res = await fetch(API_URL);
@@ -1439,7 +1441,7 @@ function Reviews() {
     }
   };
 
-  // Fetch all reviews
+  // Fetch reviews
   const fetchAllReviews = async () => {
     try {
       const res = await fetch("http://localhost:8000/api/reviews");
@@ -1451,20 +1453,25 @@ function Reviews() {
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchProducts();
     fetchAllReviews();
   }, []);
 
-  // Filter reviews by selected product
+  // Filter reviews
   useEffect(() => {
     if (selectedProduct) {
-      setReviews(allReviews.filter((r) => r.product === selectedProduct));
+      setReviews(allReviews.filter((r) => r.product?._id === selectedProduct));
     } else {
       setReviews(allReviews);
     }
   }, [selectedProduct, allReviews]);
+
+  // Image URL helper
+  const getImageUrl = (img) => {
+    if (!img) return "";
+    return img.startsWith("http") ? img : `http://localhost:8000${img}`;
+  };
 
   return (
     <Box sx={{ p: 3, minHeight: "100vh", backgroundColor: "#f9fafb" }}>
@@ -1486,50 +1493,120 @@ function Reviews() {
         ))}
       </Select>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 2, overflowX: "auto" }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
         <Table stickyHeader>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#f1f3f5" }}>
-              <TableCell sx={{ fontWeight: "bold" }}>User Name</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Product Name</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>User</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Product</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Rating</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Comment</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Image</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {reviews.length > 0 ? (
               reviews.map((r) => (
                 <TableRow key={r._id} hover>
-                  <TableCell>{r.user?.name || "Deleted User"}</TableCell>
-                  <TableCell>{r.product?.name || "Deleted Product"}</TableCell>
+
+                  <TableCell>
+                    {r.user?.name || "Deleted User"}
+                  </TableCell>
+
+                  <TableCell>
+                    {r.product?.name || "Deleted Product"}
+                  </TableCell>
+
                   <TableCell>
                     {Array.from({ length: 5 }, (_, i) => (
-                      <span key={i} style={{ color: i < r.rating ? "#ffb400" : "#ccc" }}>
+                      <span
+                        key={i}
+                        style={{
+                          color: i < r.rating ? "#ffb400" : "#ccc",
+                          fontSize: "18px"
+                        }}
+                      >
                         ★
                       </span>
                     ))}
                   </TableCell>
-                  <TableCell>{r.comment || "-"}</TableCell>
+
+                  <TableCell>
+                    {r.comment || "-"}
+                  </TableCell>
+
+                  {/* IMAGE COLUMN */}
+                  <TableCell>
+  {r.image ? (
+    <img
+      src={getImageUrl(r.image)}
+      alt="review"
+      style={{
+        width: "70px",
+        height: "70px",
+        objectFit: "cover",
+        borderRadius: "6px",
+        cursor: "pointer",
+        border: "1px solid #eee"
+      }}
+      onClick={() => {
+        setSelectedImage(getImageUrl(r.image));
+        setOpenImage(true);
+      }}
+    />
+  ) : (
+    "-"
+  )}
+</TableCell>
+
                   <TableCell>
                     {new Date(r.createdAt).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
-                      year: "numeric",
+                      year: "numeric"
                     })}
                   </TableCell>
+
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 6 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
                   No reviews found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
+
         </Table>
       </TableContainer>
+     <Dialog
+  open={openImage}
+  onClose={() => setOpenImage(false)}
+  maxWidth="lg"
+  fullWidth
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "10px"
+    }}
+  >
+    <img
+      src={selectedImage}
+      alt="Full Review"
+      style={{
+        maxWidth: "100%",
+        maxHeight: "90vh",
+        objectFit: "contain"
+      }}
+    />
+  </div>
+</Dialog>
     </Box>
   );
 }

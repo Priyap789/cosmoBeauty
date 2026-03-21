@@ -35,6 +35,7 @@ const userSchema = new mongoose.Schema(
       default: "user"
     },
 
+    // ✅ UPDATED ADDRESSES
     addresses: [
       {
         fullName: String,
@@ -42,6 +43,8 @@ const userSchema = new mongoose.Schema(
         address: String,
         city: String,
         state: String,
+        district: String,   // ✅ NEW
+        country: String,    // ✅ NEW
         pincode: String
       }
     ],
@@ -54,7 +57,7 @@ const userSchema = new mongoose.Schema(
     emailOtp: String,
     emailOtpExpire: Date,
 
-    // ✅ Password Reset Fields (updated)
+    // ✅ Password Reset Fields
     resetOtp: String,
     resetOtpExpire: Date
   },

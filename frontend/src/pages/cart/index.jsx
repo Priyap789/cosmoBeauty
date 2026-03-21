@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import Swal from "sweetalert2";
 function Cart() {
   const cartItems = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
@@ -32,11 +32,37 @@ function Cart() {
   };
 
   const removeItem = async (productId) => {
-    await axios.delete("http://localhost:8000/api/cart/remove", {
-      data: { userId, productId },
-    });
-    dispatch(fetchCart(userId));
-  };
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "Do you want to remove this product from cart?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#ec4899", // pink
+    cancelButtonColor: "#6b7280", // gray
+    confirmButtonText: "Yes, remove it!",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete("http://localhost:8000/api/cart/remove", {
+        data: { userId, productId },
+      });
+
+      dispatch(fetchCart(userId));
+
+      Swal.fire({
+        title: "Removed!",
+        text: "Product has been removed.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.log(error);
+      Swal.fire("Error", "Something went wrong!", "error");
+    }
+  }
+};
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -190,11 +216,23 @@ function Cart() {
                 </div>
 
                 <button
-                  onClick={() => navigate("/checkout")}
-                  className="w-full mt-8 bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-pink transition-all shadow-xl shadow-gray-200 active:scale-[0.98]"
-                >
-                  Proceed to Checkout
-                </button>
+  onClick={() =>
+    navigate("/checkout", {
+      state: {
+        cartItems: cartItems.map(item => ({
+          productId: item.product._id,
+          name: item.product.name,
+          price: item.price,
+          quantity: item.quantity,
+          mainImage: item.product.images?.[0] || ""
+        }))
+      }
+    })
+  }
+  className="w-full mt-8 bg-pink-600 text-white py-4 rounded-2xl font-bold hover:bg-pink transition-all shadow-xl shadow-gray-200 active:scale-[0.98]"
+>
+  Proceed to Checkout
+</button>
 
                 <Link
                   to="/products"
